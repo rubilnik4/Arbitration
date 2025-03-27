@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Domain\Models.fs" />
+        <Compile Include="Domain\Types.fs" />
+        <Compile Include="Application\Interfaces.fs" />
+        <Compile Include="Application\Commands\ComputeSpread.fs" />
+        <Folder Include="Infrastructure\" />
+        <Compile Include="WeatherForecast.fs" />
+        <Compile Include="WeatherForecastController.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharpPlus" Version="1.7.0" />
+    </ItemGroup>
+
+</Project>
