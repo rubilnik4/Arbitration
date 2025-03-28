@@ -7,17 +7,24 @@
     <ItemGroup>
         <Compile Include="Domain\Models.fs" />
         <Compile Include="Domain\Types.fs" />
+        <Compile Include="Common\TimerService.fs" />
+        <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
+        <Compile Include="Application\Environments.fs" />
         <Compile Include="Application\Commands.fs" />
         <Compile Include="Application\Commands\ComputeSpread.fs" />
-        <Folder Include="Infrastructure\" />
+        <Folder Include="Application\Interfaces\" />
+        <Compile Include="Infrastructure\SpreadRepository.fs" />
+        <Compile Include="Infrastructure\MarketData.fs" />
         <Compile Include="WeatherForecast.fs" />
         <Compile Include="WeatherForecastController.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FSharpPlus" Version="1.7.0" />
+      <PackageReference Include="Binance.Net" Version="10.19.0" />
+      <PackageReference Remove="FSharp.Core" />
+      <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

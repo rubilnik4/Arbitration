@@ -1,33 +1,23 @@
 module Arbitration.Application.Interfaces
 
+open System
 open System.Threading.Tasks
 open Arbitration.Domain.Models
 open Arbitration.Domain.Types
+open Npgsql
 
 type MarketData = {
-    GetPrice: string -> Task<PriceResult>
-    GetLastPrice: string -> Task<PriceResult>
+    GetPrice: AssetId -> Task<PriceResult>
+    GetLastPrice: AssetId -> Task<PriceResult>
 }
 
-type Storage = {
-    SaveSpread: Spread -> unit
+type SpreadRepository = {
+    SaveSpread: Spread -> Task<SpreadId>
+    GetLastPrice: AssetId -> DateTimeOffset -> Task<Option<Price>>
 }
 
 type Cache ={
     Set: string -> decimal -> unit
-}
-
-type Config = {
-    SpreadThreshold: decimal
-    MaxHistorySize: int
-}
-
-type Env = {
-    Logger: string -> unit
-    MarketData: MarketData
-    Storage: Storage
-    Cache: Cache
-    Config: Config
 }
 
 type Command<'env, 'state, 'input, 'output> =

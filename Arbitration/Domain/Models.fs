@@ -4,18 +4,19 @@ open System
 
 type AssetId = string
 
-type SpreadId = string
+type SpreadId = Guid
 
 type Price = {
     Asset: AssetId
     Value: decimal
+    Time: DateTime
 }
 
 type Spread = {
-    AssetA: AssetId
-    AssetB: AssetId
+    PriceA: Price
+    PriceB: Price
     Value: decimal
-    Time: DateTimeOffset
+    Time: DateTime
 }
 
 type SpreadState = {

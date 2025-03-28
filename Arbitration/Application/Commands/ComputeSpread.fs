@@ -1,20 +1,19 @@
 module Arbitration.Application.Commands.ComputeSpread
 
-open System
 open System.Threading.Tasks
+open Arbitration.Application.Configurations
 open Arbitration.Domain.Types
-open FSharpPlus
 open Arbitration.Domain.Models
 open Arbitration.Application.Interfaces
+open Arbitration.Infrastructure
 
 let private getSpread (priceA: Price) (priceB: Price) =    
-    let spreadValue = (priceA.Value - priceB.Value) |> abs
-    let now = DateTimeOffset.UtcNow
+    let spreadValue = (priceA.Value - priceB.Value) |> abs    
     {
-        AssetA = priceA.Asset
-        AssetB = priceB.Asset
+        PriceA = priceA
+        PriceB = priceB
         Value = spreadValue
-        Time = now
+        Time = TimerService.getUtcDatetime()
     }
 
 let private getAvailablePrice marketData asset : Task<PriceResult> = task {
@@ -31,7 +30,7 @@ let private getAvailablePrice marketData asset : Task<PriceResult> = task {
             return $"No data available at all for {asset}" |> Error        
 } 
 
-let private updateState config spread state =    
+let private updateState (config: ProjectConfig) spread state =    
     let updatedHistory = spread :: state.SpreadHistory |> List.take config.MaxHistorySize
     let isThresholdExceeded = spread > config.SpreadThreshold
     { state with
@@ -47,7 +46,7 @@ let computeSpread : SpreadCommand =
         match priceAResult, priceBResult with
         | Ok priceA, Ok priceB ->            
             let spread = getSpread priceA priceB
-            let newState = state |> updateState env.Config spread.Value 
+            let newState = state |> updateState env.Config.Project spread.Value 
             return spread |> Ok, newState
         | Error e, _
         | _, Error e ->

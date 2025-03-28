@@ -13,6 +13,8 @@ type SpreadInput = {
 
 type ArbitrationResult<'a> = Result<'a, string>
 
-type PriceResult = Result<Price, string>
+type PriceResult = ArbitrationResult<Price>
 
-type SpreadResult = Result<Spread, string>
+type SpreadIdResult = ArbitrationResult<SpreadId>
+
+type SpreadResult = ArbitrationResult<Spread>
