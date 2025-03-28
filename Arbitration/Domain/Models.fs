@@ -2,14 +2,18 @@ module Arbitration.Domain.Models
 
 open System
 
-type Asset = {
-    Asset: string
+type AssetId = string
+
+type SpreadId = string
+
+type Price = {
+    Asset: AssetId
     Value: decimal
 }
 
 type Spread = {
-    AssetA: string
-    AssetB: string
+    AssetA: AssetId
+    AssetB: AssetId
     Value: decimal
     Time: DateTimeOffset
 }

@@ -8,6 +8,7 @@
         <Compile Include="Domain\Models.fs" />
         <Compile Include="Domain\Types.fs" />
         <Compile Include="Application\Interfaces.fs" />
+        <Compile Include="Application\Commands.fs" />
         <Compile Include="Application\Commands\ComputeSpread.fs" />
         <Folder Include="Infrastructure\" />
         <Compile Include="WeatherForecast.fs" />

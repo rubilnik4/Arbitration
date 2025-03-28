@@ -1,12 +1,18 @@
 module Arbitration.Domain.Types
 
-type Asset = string
-
-type SpreadId = string
+open Arbitration.Domain.Models
 
 type SpreadQuery =
     | GetLastSpread
     | GetHistory
 
-type SpreadCommand =
-    | ComputeSpread of Asset * Asset
+type SpreadInput = {
+    AssetA: AssetId
+    AssetB: AssetId
+}
+
+type ArbitrationResult<'a> = Result<'a, string>
+
+type PriceResult = Result<Price, string>
+
+type SpreadResult = Result<Spread, string>

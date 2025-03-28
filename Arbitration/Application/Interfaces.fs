@@ -2,13 +2,11 @@ module Arbitration.Application.Interfaces
 
 open System.Threading.Tasks
 open Arbitration.Domain.Models
-open FSharpPlus.Data
-
-type SpreadResult<'a> = Result<'a, string>
+open Arbitration.Domain.Types
 
 type MarketData = {
-    GetPrice: string -> Async<SpreadResult<Asset>>
-    GetLastPrice: string -> Async<SpreadResult<Asset>>
+    GetPrice: string -> Task<PriceResult>
+    GetLastPrice: string -> Task<PriceResult>
 }
 
 type Storage = {
@@ -32,8 +30,6 @@ type Env = {
     Config: Config
 }
 
-type SpreadResultT<'a> = ResultT<Async<'a>>
-
-type SpreadStateT<'a> = StateT<SpreadState, SpreadResultT<'a>>
-
-type SpreadAppT<'a> = ReaderT<Env, SpreadStateT<'a>>
+type Command<'env, 'state, 'input, 'output> =
+    'env -> 'state -> 'input -> Task<'output * 'state>
+    

@@ -1,61 +1,55 @@
 module Arbitration.Application.Commands.ComputeSpread
 
 open System
+open System.Threading.Tasks
+open Arbitration.Domain.Types
 open FSharpPlus
-open FSharpPlus.Data
 open Arbitration.Domain.Models
 open Arbitration.Application.Interfaces
 
-let private getSpread (assetA: Asset) (assetB: Asset) =    
-    let spreadValue = (assetA.Value - assetB.Value) |> abs
+let private getSpread (priceA: Price) (priceB: Price) =    
+    let spreadValue = (priceA.Value - priceB.Value) |> abs
     let now = DateTimeOffset.UtcNow
     {
-        AssetA = assetA.Asset
-        AssetB = assetB.Asset
+        AssetA = priceA.Asset
+        AssetB = priceB.Asset
         Value = spreadValue
         Time = now
     }
 
-let private getAvailablePrice marketData asset : SpreadResultT<Asset> = monad {    
-    let! marketPrice = marketData.GetPrice asset
-    
-    match marketPrice with
-    | Ok price ->
-        return price |> Ok
+let private getAvailablePrice marketData asset : Task<PriceResult> = task {
+    let! marketPriceResult = marketData.GetPrice asset
+    match marketPriceResult with
+    | Ok marketPrice ->
+        return marketPrice |> Ok
     | Error _ ->    
-        let! lastPrice = marketData.GetLastPrice asset
-        match lastPrice with
-        | Ok price ->                
-            return price |> Ok
+        let! lastPriceResult = marketData.GetLastPrice asset
+        match lastPriceResult with
+        | Ok lastPrice ->                
+            return lastPrice |> Ok
         | Error _ ->
-            return $"No data available at all for {asset}" |> Error            
-}
+            return $"No data available at all for {asset}" |> Error        
+} 
 
-let updateState (spread: decimal) (threshold: decimal) : SpreadState -> SpreadState =
-    fun state ->
-        let updatedHistory = spread :: state.SpreadHistory |> List.take 10
-        let isThresholdExceeded = spread > threshold
-        { state with
-            LastSpread = Some spread
-            SpreadHistory = updatedHistory
-            IsThresholdExceeded = isThresholdExceeded }
-    
-let handle assetA assetB : SpreadAppT<Spread> = monad {
-    let! env = ask
-    
-    let! assetA = assetA |> (getAvailablePrice env.MarketData) |> StateT.lift |> ReaderT.lift
-    let! assetB = assetB |> (getAvailablePrice env.MarketData) |> StateT.lift |> ReaderT.lift   
-   
-    let spread = getSpread assetA assetB
-    // let spread assetA assetB : SpreadResult<Spread> = monad {
-    //     let! assetA = assetA
-    //     let! assetB = assetB
-    //     return getSpread assetA assetB
-    // }
-    return spread
-}
+let private updateState config spread state =    
+    let updatedHistory = spread :: state.SpreadHistory |> List.take config.MaxHistorySize
+    let isThresholdExceeded = spread > config.SpreadThreshold
+    { state with
+        LastSpread = Some spread
+        SpreadHistory = updatedHistory
+        IsThresholdExceeded = isThresholdExceeded }   
 
+let computeSpread : SpreadCommand =
+    fun env state input -> task {
+        let! priceAResult = input.AssetA |> getAvailablePrice env.MarketData 
+        let! priceBResult = input.AssetB |> getAvailablePrice env.MarketData 
 
-    // let! state = get
-    //     // let newState = { state with IsThresholdExceeded = true }
-    //     // do! put newState
+        match priceAResult, priceBResult with
+        | Ok priceA, Ok priceB ->            
+            let spread = getSpread priceA priceB
+            let newState = state |> updateState env.Config spread.Value 
+            return spread |> Ok, newState
+        | Error e, _
+        | _, Error e ->
+            return $"Error fetching prices: {e}, state {state}" |> Error, state
+    }
