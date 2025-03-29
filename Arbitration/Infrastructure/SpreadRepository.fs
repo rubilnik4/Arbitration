@@ -7,7 +7,7 @@ open Arbitration.Domain.Models
 open Arbitration.Domain.Types
 open Npgsql.FSharp
  
-let tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task {
+let private tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task {
     try
         let! result = action()
         return Ok result
@@ -42,7 +42,7 @@ let private saveSpread env spread = task {
     return result |> Result.map _.Head
 }
 
-let private getLastPrice env asset beforeTime = task {
+let private getLastPrice env asset = task {
     let! result = tryDb(fun () ->
         Sql.connect env.Source.ConnectionString
         |> Sql.query """
@@ -52,13 +52,12 @@ let private getLastPrice env asset beforeTime = task {
                 time_a, time_b
                 spread_time
             FROM spreads
-            WHERE spread_time <= @beforeTime AND (asset_a = @asset OR asset_b = @asset)
+            WHERE asset_a = @asset OR asset_b = @asset
             ORDER BY spread_time DESC
             LIMIT 1
         """
         |> Sql.parameters [
             "asset", Sql.string asset
-            "beforeTime", Sql.timestamp beforeTime
         ]
         |> Sql.executeAsync (fun read -> 
             let assetA = read.string "asset_a"

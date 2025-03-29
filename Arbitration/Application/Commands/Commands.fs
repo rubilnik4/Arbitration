@@ -1,6 +1,5 @@
-module Arbitration.Application.Commands
+module Arbitration.Application.Commands.Commands
 
-open Arbitration.Application.Environments
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models
 open Arbitration.Domain.Types
