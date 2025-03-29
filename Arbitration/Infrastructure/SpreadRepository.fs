@@ -2,22 +2,21 @@ module Arbitration.Infrastructure.SpreadRepository
 
 open System
 open System.Threading.Tasks
-open Arbitration.Application.Environments
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models
 open Arbitration.Domain.Types
-open Npgsql
 open Npgsql.FSharp
+ 
+let tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task {
+    try
+        let! result = action()
+        return Ok result
+    with ex ->
+        return Error $"DB error: {ex.Message}"
+}
 
-let private getId<'T>  (insert : 'T) (ids: Guid list) : Guid =
-    match ids with
-        | id :: _ ->
-            id 
-        | [] ->
-            failwith $"No ID returned from INSERT {insert}"
-            
-let private saveSpread (env: PostgresEnv) (spread: Spread) : Task<SpreadId> = task {
-    let! idResult =
+let private saveSpread env spread = task {
+    let! result = tryDb(fun () ->
         Sql.connect env.Source.ConnectionString
         |> Sql.query """
             INSERT INTO spreads (
@@ -38,33 +37,46 @@ let private saveSpread (env: PostgresEnv) (spread: Spread) : Task<SpreadId> = ta
             "spread_value", Sql.decimal spread.Value
             "spread_time", Sql.timestamp spread.Time
         ]
-        |> Sql.executeAsync (fun read -> read.uuid "id")
+        |> Sql.executeAsync (fun read -> read.uuid "id"))
         
-    return idResult |> getId spread
+    return result |> Result.map _.Head
 }
 
-let private saveSpread (env: PostgresEnv) (spread: Spread) : Task<Result<unit, string>> = task {
-    try
-        do!
-        return Ok ()
-    with ex ->
-        return Error $"Failed to save spread: {ex.Message}"
-}
-
-let private getLastPrice(symbol: string, time: DateTimeOffset) : Task<Option<decimal>> = task {
-    use! conn = connectionFactory()
-    let sql = """
-        SELECT source_a_price AS Price FROM spreads 
-        WHERE symbol_a = @Symbol 
-        AND spread_time <= @Time 
-        ORDER BY spread_time DESC 
-        LIMIT 1
-    """
-    let! result = conn.QueryFirstOrDefaultAsync<Nullable<decimal>>(sql, {| Symbol = symbol; Time = time |})
-    return Option.ofNullable result
+let private getLastPrice env asset beforeTime = task {
+    let! result = tryDb(fun () ->
+        Sql.connect env.Source.ConnectionString
+        |> Sql.query """
+            SELECT 
+                asset_a, price_a, 
+                asset_b, price_b,
+                time_a, time_b
+                spread_time
+            FROM spreads
+            WHERE spread_time <= @beforeTime AND (asset_a = @asset OR asset_b = @asset)
+            ORDER BY spread_time DESC
+            LIMIT 1
+        """
+        |> Sql.parameters [
+            "asset", Sql.string asset
+            "beforeTime", Sql.timestamp beforeTime
+        ]
+        |> Sql.executeAsync (fun read -> 
+            let assetA = read.string "asset_a"
+            let priceA = read.decimal "price_a"
+            let assetB = read.string "asset_b"
+            let priceB = read.decimal "price_b"
+            let timeA = read.dateTime "time_a"
+            let timeB = read.dateTime "time_b"
+            match assetA, assetB with
+            | a, _ when a = asset -> Ok { Asset = a; Value = priceA; Time = timeA }
+            | _, b when b = asset -> Ok { Asset = b; Value = priceB; Time = timeB }
+            | _ -> Error "price not found"
+        ))
+   
+    return result |> Result.bind _.Head
 }
 
 let postgresSpreadRepository : SpreadRepository = {
-    SaveSpread = getPrice
+    SaveSpread = saveSpread
     GetLastPrice = getLastPrice
 }

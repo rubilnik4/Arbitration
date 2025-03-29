@@ -10,7 +10,6 @@
         <Compile Include="Common\TimerService.fs" />
         <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
-        <Compile Include="Application\Environments.fs" />
         <Compile Include="Application\Commands.fs" />
         <Compile Include="Application\Commands\ComputeSpread.fs" />
         <Folder Include="Application\Interfaces\" />

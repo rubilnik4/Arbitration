@@ -8,4 +8,4 @@ let getUtcDatetime() =
 let withUtcDatetime (time: Nullable<DateTime>) =
     time
     |> Option.ofNullable
-    |> Option.defaultValue getUtcDatetime() 
+    |> Option.defaultWith (fun _ -> getUtcDatetime())  
