@@ -39,7 +39,7 @@ let private updateState (config: ProjectConfig) spread state =
         SpreadHistory = updatedHistory
         IsThresholdExceeded = isThresholdExceeded }   
 
-let computeSpread : SpreadCommand =
+let computeSpreadCommand : SpreadCommand =
     fun env state input -> task {
         let! priceAResult = input.AssetA |> getPrice env 
         let! priceBResult = input.AssetB |> getPrice env 

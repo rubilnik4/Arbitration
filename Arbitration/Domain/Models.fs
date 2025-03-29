@@ -24,3 +24,9 @@ type SpreadState = {
     SpreadHistory: decimal list
     IsThresholdExceeded: bool
 }
+with
+    static member Empty = {
+        LastSpread = None
+        SpreadHistory = []
+        IsThresholdExceeded = false
+    }

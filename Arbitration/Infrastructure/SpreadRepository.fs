@@ -15,31 +15,52 @@ let private tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task 
         return Error $"DB error: {ex.Message}"
 }
 
-let private saveSpread env spread = task {
-    let! result = tryDb(fun () ->
+let private savePrice env price = task {
+    let! result =
         Sql.connect env.Source.ConnectionString
         |> Sql.query """
-            INSERT INTO spreads (
-                id, asset_a, asset_b, price_a, price_b, time_a, time_b, spread_value, spread_time
-            ) VALUES (
-                @id, @asset_a, @asset_b, @price_a, @price_b, @time_a, @time_b, @spread_value, @spread_time
+            INSERT INTO prices (id, asset, price, time)
+            SELECT @id, @asset, @price, @time
+            WHERE NOT EXISTS (
+                SELECT 1 FROM prices WHERE asset = @asset AND time = @time
             )
             RETURNING id
         """
         |> Sql.parameters [
             "id", Sql.uuid (Guid.NewGuid())
-            "asset_a", Sql.string spread.PriceA.Asset
-            "asset_b", Sql.string spread.PriceB.Asset
-            "price_a", Sql.decimal spread.PriceA.Value
-            "price_b", Sql.decimal spread.PriceB.Value
-            "time_a", Sql.timestamp spread.PriceA.Time
-            "time_b", Sql.timestamp spread.PriceB.Time
+            "asset", Sql.string price.Asset
+            "price", Sql.decimal price.Value
+            "time", Sql.timestamp price.Time
+        ]
+        |> Sql.executeAsync (fun read -> read.uuid "id")
+        
+    return result |> _.Head
+}
+
+let private saveSpread (env: PostgresEnv) (spread: Spread) = task {
+    let! priceA = savePrice env spread.PriceA
+    let! priceB = savePrice env spread.PriceB
+    
+    let! spread = 
+        Sql.connect env.Source.ConnectionString
+        |> Sql.query """
+            INSERT INTO spreads (
+                id, price_a_id, price_b_id, spread_value, spread_time
+            ) VALUES (
+                @id, @price_a_id, @price_b_id, @spread_value, @spread_time
+            )
+            RETURNING id
+        """
+        |> Sql.parameters [
+            "id", Sql.uuid (Guid.NewGuid())
+            "price_a_id", Sql.uuid priceA
+            "price_b_id", Sql.uuid priceA
             "spread_value", Sql.decimal spread.Value
             "spread_time", Sql.timestamp spread.Time
         ]
-        |> Sql.executeAsync (fun read -> read.uuid "id"))
-        
-    return result |> Result.map _.Head
+        |> Sql.executeAsync (fun read -> read.uuid "id")
+    
+    return spread |> _.Head   
 }
 
 let private getLastPrice env asset = task {
@@ -76,6 +97,6 @@ let private getLastPrice env asset = task {
 }
 
 let postgresSpreadRepository : SpreadRepository = {
-    SaveSpread = saveSpread
+    SaveSpread = saveSpread |> tryDb
     GetLastPrice = getLastPrice
 }

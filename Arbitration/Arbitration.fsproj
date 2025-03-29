@@ -15,6 +15,7 @@
         <Compile Include="Infrastructure\SpreadRepository.fs" />
         <Compile Include="Infrastructure\SpreadApi.fs" />
         <Compile Include="Infrastructure\MarketData.fs" />
+        <Compile Include="Controllers\Controller.fs" />
         <Compile Include="Controllers\SpreadController.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
