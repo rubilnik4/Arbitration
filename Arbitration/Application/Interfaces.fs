@@ -45,3 +45,12 @@ and Cache ={
 type Command<'env, 'state, 'input, 'output> =
     'env -> 'state -> 'input -> Task<'output * 'state>
     
+let createEnv () : Env =
+    let config = { 
+        ConnectionString = "your_connection_string"
+        ApiKey = "your_api_key"
+        ProjectThreshold = 0.1m
+        ApiUrl = "https://api.example.com"
+    }
+    { Config = config }
+    

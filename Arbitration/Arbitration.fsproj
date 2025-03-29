@@ -15,7 +15,7 @@
         <Compile Include="Infrastructure\SpreadRepository.fs" />
         <Compile Include="Infrastructure\SpreadApi.fs" />
         <Compile Include="Infrastructure\MarketData.fs" />
-        <Folder Include="Controllers\" />
+        <Compile Include="Controllers\SpreadController.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -23,6 +23,9 @@
       <PackageReference Include="Binance.Net" Version="10.19.0" />
       <PackageReference Remove="FSharp.Core" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
+      <PackageReference Include="Oxpecker" Version="1.2.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.0.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

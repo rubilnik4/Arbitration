@@ -1,0 +1,2 @@
+module Arbitration.Controllers.SpreadController
+

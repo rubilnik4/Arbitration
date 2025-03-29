@@ -1,35 +1,51 @@
-namespace Arbitration
+module Arbitration.Program
+
 #nowarn "20"
-open System
-open System.Collections.Generic
-open System.IO
-open System.Linq
-open System.Threading.Tasks
-open Microsoft.AspNetCore
+open Arbitration.Application.Interfaces
 open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.HttpsPolicy
-open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.Logging
+open Microsoft.OpenApi.Models
+open Oxpecker
 
-module Program =
-    let exitCode = 0
+let sayHelloWorld : EndpointHandler = text "Hello World, from Oxpecker"
 
-    [<EntryPoint>]
-    let main args =        
-        let builder = WebApplication.CreateBuilder(args)
+let webApp = GET [
+    route "/" <| sayHelloWorld
+]
+    
+let configureApp (appBuilder: IApplicationBuilder) =
+    appBuilder
+        .UseRouting()
+        .UseOxpecker(webApp)
+        .UseSwagger()
+        .UseSwaggerUI(fun c ->
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Spread API V1")
+            //c.RoutePrefix <- ""
+        )
+    |> ignore
 
-        builder.Services.AddControllers()
-
-        let app = builder.Build()
-
-        app.UseHttpsRedirection()
-
-        app.UseAuthorization()
-        app.MapControllers()
-
-        app.Run()  
-
-        exitCode
+let configureServices (services: IServiceCollection) =
+    services
+        .AddRouting()
+        .AddOxpecker()
+        .AddSingleton(createEnv())
+        .AddEndpointsApiExplorer()
+        .AddSwaggerGen(fun c ->
+            c.SwaggerDoc("v1", OpenApiInfo(
+                Title = "Spread API",
+                Version = "v1",
+                Description = "Сервис для вычисления спреда между двумя активами"
+            ))            
+            //c.CustomSchemaIds _.Name
+    )
+    |> ignore
+    
+[<EntryPoint>]
+let main args =
+    let builder = WebApplication.CreateBuilder(args)
+    configureServices builder.Services
+    let app = builder.Build()
+    configureApp app
+    app.Run()
+    0
