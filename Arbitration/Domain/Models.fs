@@ -12,6 +12,11 @@ type Price = {
     Time: DateTime
 }
 
+type SpreadAsset = {
+    AssetA: AssetId
+    AssetB: AssetId
+}
+
 type Spread = {
     PriceA: Price
     PriceB: Price

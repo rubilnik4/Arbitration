@@ -1,4 +1,4 @@
-module Arbitration.Infrastructure.TimerService
+module Arbitration.Infrastructure.DateTimeUtils
 
 open System
 

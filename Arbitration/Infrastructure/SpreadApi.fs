@@ -21,7 +21,7 @@ let private getPrice env asset = task {
             let price = {
                 Asset = asset
                 Value = result.Data.Price
-                Time = result.Data.Timestamp |> TimerService.withUtcDatetime
+                Time = result.Data.Timestamp |> DateTimeUtils.withUtcDatetime
             }
             return price |> Ok            
         | false ->

@@ -7,15 +7,20 @@
     <ItemGroup>
         <Compile Include="Domain\Models.fs" />
         <Compile Include="Domain\Types.fs" />
-        <Compile Include="Common\TimerService.fs" />
+        <Compile Include="Common\DateTimeUtils.fs" />
         <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
+        <Compile Include="Application\Queries\Queries.fs" />
+        <Compile Include="Application\Queries\PriceQuery.fs" />
+        <Compile Include="Application\Queries\SpreadQuery.fs" />
         <Compile Include="Application\Commands\Commands.fs" />
-        <Compile Include="Application\Commands\ComputeSpread.fs" />
+        <Compile Include="Application\Commands\SpreadCommand.fs" />
+        <Compile Include="Application\Dto\Dtos.fs" />
         <Compile Include="Infrastructure\SpreadRepository.fs" />
         <Compile Include="Infrastructure\SpreadApi.fs" />
         <Compile Include="Infrastructure\MarketData.fs" />
-        <Compile Include="Controllers\Controller.fs" />
+        <Compile Include="Controllers\Routes.fs" />
+        <Compile Include="Controllers\PriceController.fs" />
         <Compile Include="Controllers\SpreadController.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

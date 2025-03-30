@@ -31,18 +31,23 @@ and SpreadApi = {
 and SpreadRepository = {
     SaveSpread: PostgresEnv -> Spread -> Task<SpreadIdResult>
     GetLastPrice: PostgresEnv -> AssetId -> Task<PriceResult>
+    GetLastSpread: PostgresEnv -> SpreadAsset -> Task<SpreadResult>
 }
 
 and MarketData = {
     GetPrice: Env -> AssetId -> Task<PriceResult>
     GetLastPrice: Env -> AssetId -> Task<PriceResult>
+    GetLastSpread: Env -> SpreadAsset -> Task<SpreadResult>
 }
 
 and Cache ={
     Set: string -> decimal -> unit
 }
 
-type Command<'env, 'state, 'input, 'output> =
+type ArbitrationQuery<'env, 'input, 'output> =
+    'env -> 'input -> Task<'output>
+    
+type ArbitrationCommand<'env, 'state, 'input, 'output> =
     'env -> 'state -> 'input -> Task<'output * 'state>
     
 let createEnv () : Env =

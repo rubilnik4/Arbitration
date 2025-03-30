@@ -1,41 +1,53 @@
 module Arbitration.Controllers.SpreadController
 
-open Arbitration.Application.Commands.ComputeSpread
-open Arbitration.Application.Interfaces
-open Arbitration.Controllers.Controller
+open Arbitration.Application.Commands.SpreadCommand
+open Arbitration.Application.Dto.DtoModels
+open Arbitration.Application.Queries.SpreadQuery
+open Arbitration.Controllers.Routes
 open Arbitration.Domain.Models
-open Arbitration.Domain.Types
-open Microsoft.AspNetCore.Http
-open Microsoft.AspNetCore.Http.HttpResults
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 
 let private spreadPath =
-    getRoute spreadRoute
-
-let getLastSpreadController env : EndpointHandler = 
+    getRoute SpreadRoute
+    
+let private getLastSpread env : EndpointHandler = 
     fun ctx -> task {
-        let marketData = env.MarketData
-        let result = marketData.GetLastPrice
-        return! ctx.Response.WriteAsync("Last spread details")
+        match ctx.TryGetQueryValue "assetA", ctx.TryGetQueryValue "assetB"  with
+        | Some assetA, Some assetB ->
+            let spreadAsset = {AssetA = assetA; AssetB = assetB}
+            let! result = spreadQuery env spreadAsset
+            return!
+                match result with
+                | Ok spread ->
+                    ctx.Write <| Ok spread
+                | Error error ->
+                    ctx.Write <| BadRequest {| Error = error |}
+        | _, _ ->
+            return! ctx.Write <| BadRequest "AssetId not found"        
     }
         
-let computeSpreadController env : EndpointHandler  =
+let private computeSpread env : EndpointHandler  =
     fun ctx -> task {
-        let assetsConfig = env.Config.Project.Assets
-        let input = { AssetA = assetsConfig.AssetA; AssetB = assetsConfig.AssetB  }
-        let state = SpreadState.Empty
-        let! result, _ = computeSpreadCommand env state input       
-        
-        return!
-            match result with
-            | Ok spread -> ctx.Write <| Ok spread
-            | Error error -> ctx.Write <| BadRequest {| Error = error |}
+        match! ctx.BindAndValidateJson<SpreadAssetRequest>() with
+            | ModelValidationResult.Valid request ->
+                let spreadAsset = { AssetA = request.AssetA; AssetB = request.AssetB }
+                let state = SpreadState.Empty
+                let! result, _ = spreadCommand env state spreadAsset       
+                
+                return!
+                    match result with
+                    | Ok spread -> ctx.Write <| Ok spread
+                    | Error error -> ctx.Write <| BadRequest {| Error = error |}
+            | ModelValidationResult.Invalid (_, errors) ->
+                return! ctx.Write <| BadRequest errors.All
+                
+       
     }
 
-let webApp env = [
+let spreadWebApp env = [
     subRoute spreadPath [
-        GET [ route "/" <| getLastSpreadController env ]
-        POST [ route "/" <| computeSpreadController env ]
+        GET [ route "/" <| getLastSpread env ]
+        POST [ route "/" <| computeSpread env ]
     ]
 ]

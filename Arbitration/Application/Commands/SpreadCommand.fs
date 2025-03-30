@@ -1,4 +1,4 @@
-module Arbitration.Application.Commands.ComputeSpread
+module Arbitration.Application.Commands.SpreadCommand
 
 open System.Threading.Tasks
 open Arbitration.Application.Commands.Commands
@@ -14,7 +14,7 @@ let private getSpread (priceA: Price) (priceB: Price) =
         PriceA = priceA
         PriceB = priceB
         Value = spreadValue
-        Time = TimerService.getUtcDatetime()
+        Time = DateTimeUtils.getUtcDatetime()
     }
 
 let private getPrice env asset : Task<PriceResult> = task {
@@ -39,7 +39,7 @@ let private updateState (config: ProjectConfig) spread state =
         SpreadHistory = updatedHistory
         IsThresholdExceeded = isThresholdExceeded }   
 
-let computeSpreadCommand : SpreadCommand =
+let spreadCommand : SpreadCommand =
     fun env state input -> task {
         let! priceAResult = input.AssetA |> getPrice env 
         let! priceBResult = input.AssetB |> getPrice env 

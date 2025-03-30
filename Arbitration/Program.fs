@@ -2,22 +2,25 @@ module Arbitration.Program
 
 #nowarn "20"
 open Arbitration.Application.Interfaces
+open Arbitration.Controllers.PriceController
+open Arbitration.Controllers.SpreadController
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.OpenApi.Models
 open Oxpecker
 
-let sayHelloWorld : EndpointHandler = text "Hello World, from Oxpecker"
-
-let webApp = GET [
-    route "/" <| sayHelloWorld
-]
+let getEndpoints env =
+    List.Empty
+    |> List.append (priceWebApp env)
+    |> List.append (spreadWebApp env)
     
 let configureApp (appBuilder: IApplicationBuilder) =
+    let env = createEnv()
+    
     appBuilder
         .UseRouting()
-        .UseOxpecker(webApp)
+        .UseOxpecker(getEndpoints env)
         .UseSwagger()
         .UseSwaggerUI(fun c ->
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Spread API V1")
