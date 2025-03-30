@@ -1,4 +1,4 @@
-module Arbitration.Controllers.SpreadController
+module Arbitration.Controllers.SpreadEndpoint
 
 open Arbitration.Application.Commands.SpreadCommand
 open Arbitration.Application.Dto.DtoModels
@@ -45,7 +45,7 @@ let private computeSpread env : EndpointHandler  =
        
     }
 
-let spreadWebApp env = [
+let spreadEndpoints env = [
     subRoute spreadPath [
         GET [ route "/" <| getLastSpread env ]
         POST [ route "/" <| computeSpread env ]

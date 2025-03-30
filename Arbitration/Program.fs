@@ -2,8 +2,8 @@ module Arbitration.Program
 
 #nowarn "20"
 open Arbitration.Application.Interfaces
-open Arbitration.Controllers.PriceController
-open Arbitration.Controllers.SpreadController
+open Arbitration.Controllers.PriceEndpoint
+open Arbitration.Controllers.SpreadEndpoint
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
@@ -12,8 +12,8 @@ open Oxpecker
 
 let getEndpoints env =
     List.Empty
-    |> List.append (priceWebApp env)
-    |> List.append (spreadWebApp env)
+    |> List.append (priceEndpoints env)
+    |> List.append (spreadEndpoints env)
     
 let configureApp (appBuilder: IApplicationBuilder) =
     let env = createEnv()

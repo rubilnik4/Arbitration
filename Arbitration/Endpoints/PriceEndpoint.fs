@@ -1,4 +1,4 @@
-module Arbitration.Controllers.PriceController
+module Arbitration.Controllers.PriceEndpoint
 
 open Arbitration.Application.Queries.PriceQuery
 open Arbitration.Controllers.Routes
@@ -23,7 +23,7 @@ let private getLastPrice env : EndpointHandler =
             return! ctx.Write <| BadRequest "AssetId not found"        
     }
     
-let priceWebApp env = [
+let priceEndpoints env = [
     subRoute pricePath [
         GET [ route "/" <| getLastPrice env ]
     ]

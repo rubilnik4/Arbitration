@@ -19,9 +19,9 @@
         <Compile Include="Infrastructure\SpreadRepository.fs" />
         <Compile Include="Infrastructure\SpreadApi.fs" />
         <Compile Include="Infrastructure\MarketData.fs" />
-        <Compile Include="Controllers\Routes.fs" />
-        <Compile Include="Controllers\PriceController.fs" />
-        <Compile Include="Controllers\SpreadController.fs" />
+        <Compile Include="Endpoints\Routes.fs" />
+        <Compile Include="Endpoints\PriceEndpoint.fs" />
+        <Compile Include="Endpoints\SpreadEndpoint.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
