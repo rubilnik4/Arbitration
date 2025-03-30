@@ -3,8 +3,10 @@ module Arbitration.Application.Commands.SpreadCommand
 open System.Threading.Tasks
 open Arbitration.Application.Commands.Commands
 open Arbitration.Application.Configurations
+open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Types
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Prices
+open Arbitration.Domain.Models.Spreads
 open Arbitration.Application.Interfaces
 open Arbitration.Infrastructure
 
@@ -41,8 +43,9 @@ let private updateState (config: ProjectConfig) spread state =
 
 let spreadCommand : SpreadCommand =
     fun env state input -> task {
-        let! priceAResult = input.AssetA |> getPrice env 
-        let! priceBResult = input.AssetB |> getPrice env 
+        let spreadAssets = normalizeAsset input
+        let! priceAResult = spreadAssets.AssetA |> getPrice env 
+        let! priceBResult = spreadAssets.AssetB |> getPrice env 
 
         match priceAResult, priceBResult with
         | Ok priceA, Ok priceB ->            

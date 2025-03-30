@@ -1,20 +1,11 @@
 module Arbitration.Infrastructure.SpreadApi
 
 open Arbitration.Application.Interfaces
-open Binance.Net.Clients
-open Arbitration.Domain.Models
-open Binance.Net.Objects.Options
-open Microsoft.Extensions.Options
-
-let private getClient env =
-    let options = BinanceRestOptions()
-    let optionsWrapper = Options.Create(options)
-    let client = env.HttpClientFactory.CreateClient("binance")
-    new BinanceRestClient(client, env.Logger, optionsWrapper)
-    
+open Arbitration.Domain.Models.Prices
+   
 let private getPrice env asset = task {
     try       
-        let client = getClient env
+        let client = env.BinanceRestClient
         let! result = client.UsdFuturesApi.ExchangeData.GetPriceAsync asset
         match result.Success with
         | true ->
@@ -30,6 +21,6 @@ let private getPrice env asset = task {
         return $"Binance API error: {ex.Message}" |> Error
 }
 
-let BinanceSpreadApi : SpreadApi = {
+let binanceSpreadApi : SpreadApi = {
     GetPrice = getPrice
 }

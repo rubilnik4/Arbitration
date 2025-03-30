@@ -5,9 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Domain\Models.fs" />
-        <Compile Include="Domain\Types.fs" />
-        <Compile Include="Common\DateTimeUtils.fs" />
+        <Compile Include="Domain\Models\Assets.fs" />
+        <Compile Include="Domain\Models\Prices.fs" />
+        <Compile Include="Domain\Models\Spreads.fs" />
+        <Compile Include="Types.fs" />
+        <Compile Include="Shared\DateTimeUtils.fs" />
         <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
         <Compile Include="Application\Queries\Queries.fs" />
@@ -22,6 +24,7 @@
         <Compile Include="Endpoints\Routes.fs" />
         <Compile Include="Endpoints\PriceEndpoint.fs" />
         <Compile Include="Endpoints\SpreadEndpoint.fs" />
+        <Compile Include="CompositionRoot.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -29,6 +32,7 @@
       <PackageReference Include="Binance.Net" Version="10.19.0" />
       <PackageReference Remove="FSharp.Core" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
+      <PackageReference Include="NpgsqlFSharpAnalyzer" Version="3.26.1" />
       <PackageReference Include="Oxpecker" Version="1.2.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.0.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.0" />

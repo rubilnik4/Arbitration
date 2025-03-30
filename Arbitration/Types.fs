@@ -1,6 +1,7 @@
 module Arbitration.Domain.Types
 
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Prices
+open Arbitration.Domain.Models.Spreads
 
 type ArbitrationResult<'a> = Result<'a, string>
 

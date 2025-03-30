@@ -1,10 +1,10 @@
 module Arbitration.Application.Dto.DtoModels
 
 open System.ComponentModel.DataAnnotations
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Assets
 
 [<CLIMutable>]
-type SpreadAssetRequest = {
+type AssetSpreadRequest = {
     [<Required>]
     AssetA: AssetId
     

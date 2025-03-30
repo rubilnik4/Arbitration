@@ -1,21 +1,9 @@
-module Arbitration.Domain.Models
+module Arbitration.Domain.Models.Spreads
 
 open System
-
-type AssetId = string
+open Arbitration.Domain.Models.Prices
 
 type SpreadId = Guid
-
-type Price = {
-    Asset: AssetId
-    Value: decimal
-    Time: DateTime
-}
-
-type SpreadAsset = {
-    AssetA: AssetId
-    AssetB: AssetId
-}
 
 type Spread = {
     PriceA: Price

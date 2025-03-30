@@ -3,7 +3,9 @@ module Arbitration.Infrastructure.SpreadRepository
 open System
 open System.Threading.Tasks
 open Arbitration.Application.Interfaces
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Spreads
+open Arbitration.Domain.Models.Prices
+open Arbitration.Domain.Models.Assets
 open Npgsql.FSharp
  
 let private tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task {
@@ -55,10 +57,10 @@ let saveSpread env spread = task {
         ]
     ]
 
-    do!
+    let! _ = 
         env.Source.ConnectionString
         |> Sql.connect
-        |> Sql.executeTransaction parameters
+        |> Sql.executeTransactionAsync parameters
 
     return spreadId
 }

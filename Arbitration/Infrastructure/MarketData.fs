@@ -14,7 +14,7 @@ let private getLastSpread env spreadAsset =
     let spreadRepository = env.SpreadRepository
     spreadRepository.GetLastSpread env.Postgres spreadAsset
 
-let MarketData : MarketData = {
+let marketData : MarketData = {
     GetPrice = getPrice
     GetLastPrice = getLastPrice
     GetLastSpread = getLastSpread

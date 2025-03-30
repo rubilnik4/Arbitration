@@ -1,6 +1,6 @@
 module Arbitration.Application.Configurations
 
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Assets
 
 type AssetConfig = {
     AssetA: AssetId

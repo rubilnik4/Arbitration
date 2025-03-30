@@ -4,7 +4,8 @@ open Arbitration.Application.Commands.SpreadCommand
 open Arbitration.Application.Dto.DtoModels
 open Arbitration.Application.Queries.SpreadQuery
 open Arbitration.Controllers.Routes
-open Arbitration.Domain.Models
+open Arbitration.Domain.Models.Assets
+open Arbitration.Domain.Models.Spreads
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 
@@ -15,7 +16,7 @@ let private getLastSpread env : EndpointHandler =
     fun ctx -> task {
         match ctx.TryGetQueryValue "assetA", ctx.TryGetQueryValue "assetB"  with
         | Some assetA, Some assetB ->
-            let spreadAsset = {AssetA = assetA; AssetB = assetB}
+            let spreadAsset = { AssetA = assetA; AssetB = assetB }
             let! result = spreadQuery env spreadAsset
             return!
                 match result with
@@ -29,7 +30,7 @@ let private getLastSpread env : EndpointHandler =
         
 let private computeSpread env : EndpointHandler  =
     fun ctx -> task {
-        match! ctx.BindAndValidateJson<SpreadAssetRequest>() with
+        match! ctx.BindAndValidateJson<AssetSpreadRequest>() with
             | ModelValidationResult.Valid request ->
                 let spreadAsset = { AssetA = request.AssetA; AssetB = request.AssetB }
                 let state = SpreadState.Empty
