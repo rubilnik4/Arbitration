@@ -8,10 +8,11 @@
         <Compile Include="Domain\Models\Assets.fs" />
         <Compile Include="Domain\Models\Prices.fs" />
         <Compile Include="Domain\Models\Spreads.fs" />
-        <Compile Include="Domain\Types.fs" />
+        <Compile Include="Domain\DomainTypes.fs" />
         <Compile Include="Shared\Core\Option.fs" />
         <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
+        <Compile Include="Application\ApplicationTypes.fs" />
         <Compile Include="Application\Queries\PriceQuery.fs" />
         <Compile Include="Application\Queries\SpreadQuery.fs" />
         <Compile Include="Application\Queries\MarketData.fs" />

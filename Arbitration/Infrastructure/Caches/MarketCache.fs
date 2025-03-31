@@ -5,7 +5,7 @@ open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads
-open Arbitration.Domain.Types
+open Arbitration.Domain.DomainTypes
 open Arbitration.Infrastructure.Caches.MarketCacheKeys
 open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Logging

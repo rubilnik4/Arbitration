@@ -6,7 +6,7 @@ open Arbitration.Application.Queries.SpreadQuery
 open Arbitration.Controllers.Routes
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Spreads
-open Arbitration.Domain.Types
+open Arbitration.Domain.DomainTypes
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 

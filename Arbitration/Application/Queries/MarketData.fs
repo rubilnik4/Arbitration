@@ -2,35 +2,34 @@ module Arbitration.Infrastructure.MarketData
 
 open Arbitration.Application.Interfaces
 
-let private getPrice env asset =
-    let marketApi = env.MarketApi
-    marketApi.GetPrice env asset
+let private getPrice env asset =    
+    env.Api.GetPrice env.Infra asset
 
 let private getLastPrice env assetId = task {
-    let marketRepository = env.MarketRepository
-    let lastPriceCache = env.MarketCache.LastPrice
-    match lastPriceCache.TryGet env assetId with
+    let marketRepository = env.Repository
+    let lastPriceCache = env.Cache.LastPrice
+    match lastPriceCache.TryGet env.Infra assetId with
     | Ok price ->
         return price |> Ok
     | Error _ ->
-        match! marketRepository.GetLastPrice env assetId with
+        match! marketRepository.GetLastPrice env.Infra assetId with
         | Ok price ->
-            lastPriceCache.Set env price |> ignore
+            lastPriceCache.Set env.Infra price |> ignore
             return price |> Ok
         | Error error ->
             return error |> Error
     }
     
 let private getLastSpread env spreadAssetId = task {
-    let spreadRepository = env.MarketRepository
-    let lastSpreadCache = env.MarketCache.LastSpread
-    match lastSpreadCache.TryGet env spreadAssetId with
+    let spreadRepository = env.Repository
+    let lastSpreadCache = env.Cache.LastSpread
+    match lastSpreadCache.TryGet env.Infra spreadAssetId with
     | Ok spread ->
         return spread |> Ok
     | Error _ ->
-        match! spreadRepository.GetLastSpread env spreadAssetId with
+        match! spreadRepository.GetLastSpread env.Infra spreadAssetId with
         | Ok spread ->
-            lastSpreadCache.Set env spread |> ignore
+            lastSpreadCache.Set env.Infra spread |> ignore
             return spread |> Ok
         | Error error ->
             return error |> Error

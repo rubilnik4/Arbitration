@@ -2,11 +2,12 @@ module Arbitration.Application.Commands.SpreadCommand
 
 open System
 open Arbitration.Application.Configurations
+open Arbitration.Application.Environments.ApplicationTypes
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads
 open Arbitration.Application.Interfaces
-open Arbitration.Domain.Types
+open Arbitration.Domain.DomainTypes
 open Microsoft.Extensions.Logging
 
 let private getSpread (priceA: Price) (priceB: Price) =    
@@ -19,17 +20,17 @@ let private getSpread (priceA: Price) (priceB: Price) =
     }
 
 let private getPrice env assetId = task {    
-    match! env.MarketData.GetPrice env assetId with
+    match! env.Data.GetPrice env assetId with
     | Ok marketPrice ->
-        env.Logger.LogInformation("Market price {assetId} get successfully", assetId)
+        env.Infra.Logger.LogInformation("Market price {assetId} get successfully", assetId)
         return marketPrice |> Ok
     | Error _ -> 
-        match! env.MarketData.GetLastPrice env assetId with
+        match! env.Data.GetLastPrice env assetId with
         | Ok lastPrice ->
-            env.Logger.LogInformation("Market price not found. Get last price {assetId}", assetId)
+            env.Infra.Logger.LogInformation("Market price not found. Get last price {assetId}", assetId)
             return lastPrice |> Ok
         | Error _ ->
-            env.Logger.LogError("No price available at all {assetId}", assetId)
+            env.Infra.Logger.LogError("No price available at all {assetId}", assetId)
             return NotFound $"No price available at all {assetId}" |> Error        
 } 
 
@@ -48,16 +49,16 @@ let private updateState env spread state =
 
 let removeSpreadCache env spread =
     let assetSpreadId = getAssetSpreadId spread
-    env.MarketCache.LastPrice.Remove env spread.PriceA.Asset |> ignore
-    env.MarketCache.LastPrice.Remove env spread.PriceB.Asset |> ignore    
-    env.MarketCache.LastSpread.Remove env assetSpreadId |> ignore
+    env.Cache.LastPrice.Remove env.Infra spread.PriceA.Asset |> ignore
+    env.Cache.LastPrice.Remove env.Infra spread.PriceB.Asset |> ignore    
+    env.Cache.LastSpread.Remove env.Infra assetSpreadId |> ignore
     
 let private saveSpread env spread = task {
-    let! spreadIdResult =  env.MarketRepository.SaveSpread env spread
+    let! spreadIdResult = env.Repository.SaveSpread env.Infra spread
     match spreadIdResult with
     | Ok spreadId ->
         removeSpreadCache env spread
-        env.Logger.LogInformation("Spread {spreadId} saved successfully", spreadId)
+        env.Infra.Logger.LogInformation("Spread {spreadId} saved successfully", spreadId)
         return spreadId |> Ok 
     | Error e -> 
         return e |> Error
@@ -66,7 +67,7 @@ let private saveSpread env spread = task {
 let spreadCommand : Command<SpreadState, AssetSpreadId, SpreadResult> =
     fun env state input -> task {
         let assetSpreadId = normalizeSpreadAsset input
-        env.Logger.LogInformation("Execute spread command for assets: {assetSpreadId}", assetSpreadId)
+        env.Infra.Logger.LogInformation("Execute spread command for assets: {assetSpreadId}", assetSpreadId)
         
         let assetA, assetB = assetSpreadId
         let! priceAResult = assetA |> getPrice env 
@@ -77,7 +78,7 @@ let spreadCommand : Command<SpreadState, AssetSpreadId, SpreadResult> =
             let spread = getSpread priceA priceB
             match! saveSpread env spread with
             | Ok _ ->
-                let newState = state |> updateState env spread 
+                let newState = state |> updateState env.Infra spread 
                 return spread |> Ok, newState
             | Error e ->
                 return e |> Error, state            

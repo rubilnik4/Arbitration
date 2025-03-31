@@ -3,7 +3,7 @@ module Arbitration.Controllers.PriceEndpoint
 open Arbitration.Application.Queries.PriceQuery
 open Arbitration.Controllers.Routes
 open Arbitration.Domain.Models.Assets
-open Arbitration.Domain.Types
+open Arbitration.Domain.DomainTypes
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 

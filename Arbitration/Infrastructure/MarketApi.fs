@@ -4,7 +4,7 @@ open System
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices
-open Arbitration.Domain.Types
+open Arbitration.Domain.DomainTypes
 open Arbitration.Shared.Core.Option
 open Microsoft.Extensions.Logging
 open Microsoft.FSharp.Core

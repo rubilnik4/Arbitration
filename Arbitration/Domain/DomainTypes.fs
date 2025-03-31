@@ -1,4 +1,4 @@
-module Arbitration.Domain.Types
+module Arbitration.Domain.DomainTypes
 
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads

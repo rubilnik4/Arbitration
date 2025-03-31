@@ -25,22 +25,22 @@ let private config =
         .AddEnvironmentVariables()
         .Build()
         .Get<Config>()
-        
-let postgresEnv = {
-    Source = NpgsqlDataSource.Create config.Postgres.ConnectionString
-}          
-        
-let private createEnv (services: IServiceProvider) = {
-    Postgres = postgresEnv
-    MarketRepository = postgresSpreadRepository
-    MarketApi = binanceMarketApi
-    MarketData = marketData
-    MarketCache = memoryMarketCache
+   
+let private createInfra (services: IServiceProvider) = {
+    Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
     BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
     Cache = services.GetRequiredService<IMemoryCache>()
     Logger = services.GetRequiredService<ILogger>()    
     Config = config
 }
+
+let private createEnv (services: IServiceProvider) = {
+    Infra = createInfra services
+    Repository = postgresSpreadRepository
+    Api = binanceMarketApi
+    Data = marketData
+    Cache = memoryMarketCache   
+}  
     
 let getEndpoints env =
     List.Empty
