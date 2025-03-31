@@ -78,7 +78,7 @@ let getLastPrice env assetId = task {
 
     match result with    
     | head::_ -> return head |> Ok
-    | [] -> return DatabaseNotFound $"Price for asset '{assetId}' not found" |> Error
+    | [] -> return NotFound $"Price for asset '{assetId}' not found" |> Error
 }
 
 let getLastSpread env spreadAssetId = task {
@@ -119,7 +119,7 @@ let getLastSpread env spreadAssetId = task {
 
     match result with    
     | head::_ -> return head |> Ok 
-    | [] -> return DatabaseNotFound $"Spread for assets '{assetIdA}' and '{assetIdB}' not found" |> Error
+    | [] -> return NotFound $"Spread for assets '{assetIdA}' and '{assetIdB}' not found" |> Error
 }
 
 let postgresSpreadRepository : MarketRepository = {

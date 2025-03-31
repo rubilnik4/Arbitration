@@ -46,8 +46,6 @@ let private computeSpread env : EndpointHandler  =
                         ctx.Write <| InternalServerError {| Error = error |}
             | ModelValidationResult.Invalid (_, errors) ->
                 return! ctx.Write <| BadRequest errors.All
-                
-       
     }
 
 let spreadEndpoints env = [

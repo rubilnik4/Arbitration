@@ -22,7 +22,7 @@ let private getCache env prefix key =
             value |> Ok
         | _ ->
             env.Logger.LogDebug("Cache for key {key} not found", prefixKey)
-            CacheNotFound $"Key {prefixKey} not found" |> Error
+            NotFound $"Key {prefixKey} not found" |> Error
     with  
     | ex ->
         env.Logger.LogError(ex, "Failed get cache for key {key}", prefixKey)
