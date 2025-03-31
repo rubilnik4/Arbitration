@@ -2,11 +2,11 @@ module Arbitration.Domain.Models.Assets
 
 type AssetId = string
 
-type AssetSpread = {
-    AssetA: AssetId
-    AssetB: AssetId
-}
+type AssetSpreadId = AssetId * AssetId
 
-let normalizeAsset assetSpread =
-    let sorted = [assetSpread.AssetA; assetSpread.AssetB] |> List.sort
-    { AssetA = sorted[0]; AssetB = sorted[1] }
+let normalizeSpreadAsset (a, b) =
+    if a < b then AssetSpreadId(a, b) else AssetSpreadId(b, a)
+    
+let getAssetSpreadKey assetSpread =
+    let a, b = normalizeSpreadAsset assetSpread
+    $"{a}|{b}"

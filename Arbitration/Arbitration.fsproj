@@ -8,19 +8,20 @@
         <Compile Include="Domain\Models\Assets.fs" />
         <Compile Include="Domain\Models\Prices.fs" />
         <Compile Include="Domain\Models\Spreads.fs" />
-        <Compile Include="Types.fs" />
+        <Compile Include="Domain\Types.fs" />
         <Compile Include="Shared\DateTimeUtils.fs" />
         <Compile Include="Application\Configurations.fs" />
         <Compile Include="Application\Interfaces.fs" />
         <Compile Include="Application\Queries\Queries.fs" />
         <Compile Include="Application\Queries\PriceQuery.fs" />
         <Compile Include="Application\Queries\SpreadQuery.fs" />
+        <Compile Include="Application\Queries\MarketData.fs" />
         <Compile Include="Application\Commands\Commands.fs" />
         <Compile Include="Application\Commands\SpreadCommand.fs" />
-        <Compile Include="Application\Dto\Dtos.fs" />
-        <Compile Include="Infrastructure\SpreadRepository.fs" />
-        <Compile Include="Infrastructure\SpreadApi.fs" />
-        <Compile Include="Infrastructure\MarketData.fs" />
+        <Compile Include="Application\Dtos\Dtos.fs" />
+        <Compile Include="Infrastructure\MarketRepository.fs" />
+        <Compile Include="Infrastructure\MarketApi.fs" />
+        <Compile Include="Infrastructure\MarketCache.fs" />
         <Compile Include="Endpoints\Routes.fs" />
         <Compile Include="Endpoints\PriceEndpoint.fs" />
         <Compile Include="Endpoints\SpreadEndpoint.fs" />
@@ -31,8 +32,8 @@
     <ItemGroup>
       <PackageReference Include="Binance.Net" Version="10.19.0" />
       <PackageReference Remove="FSharp.Core" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
-      <PackageReference Include="NpgsqlFSharpAnalyzer" Version="3.26.1" />
       <PackageReference Include="Oxpecker" Version="1.2.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.0.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.0" />

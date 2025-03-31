@@ -9,5 +9,5 @@ open Arbitration.Domain.Types
 
 let spreadQuery : SpreadQuery =
     fun env input ->
-        normalizeAsset input
+        normalizeSpreadAsset input
         |> env.MarketData.GetLastSpread env 

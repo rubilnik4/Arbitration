@@ -4,6 +4,6 @@ open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Types
     
-type PriceQuery = ArbitrationQuery<Env, AssetId, PriceResult>
+type PriceQuery = Query<AssetId, PriceResult>
 
-type SpreadQuery = ArbitrationQuery<Env, AssetSpread, SpreadResult>
+type SpreadQuery = Query<AssetSpreadId, SpreadResult>

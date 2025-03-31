@@ -1,6 +1,7 @@
 module Arbitration.Domain.Models.Spreads
 
 open System
+open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices
 
 type SpreadId = Guid
@@ -23,3 +24,10 @@ with
         SpreadHistory = []
         IsThresholdExceeded = false
     }
+
+let getAssetSpreadId spread =
+    AssetSpreadId(spread.PriceA.Asset, spread.PriceB.Asset)
+    
+let getSpreadKey spread =
+    let assetSpreadId = getAssetSpreadId spread
+    getAssetSpreadKey assetSpreadId 

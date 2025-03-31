@@ -1,5 +1,6 @@
 module Arbitration.Application.Configurations
 
+open System
 open Arbitration.Domain.Models.Assets
 
 type AssetConfig = {
@@ -17,7 +18,13 @@ type PostgresConfig = {
     ConnectionString: string
 }
 
+type CacheConfig = {  
+    LastPriceExpiration: TimeSpan
+    LastSpreadExpiration: TimeSpan
+}
+
 type Config = {
     Project: ProjectConfig
-    Postgres: PostgresConfig    
+    Postgres: PostgresConfig
+    Cache: CacheConfig
 }

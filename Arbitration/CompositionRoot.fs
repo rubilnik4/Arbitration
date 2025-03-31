@@ -6,8 +6,8 @@ open Arbitration.Application.Interfaces
 open Arbitration.Controllers.PriceEndpoint
 open Arbitration.Controllers.SpreadEndpoint
 open Arbitration.Infrastructure.MarketData
-open Arbitration.Infrastructure.SpreadApi
-open Arbitration.Infrastructure.SpreadRepository
+open Arbitration.Infrastructure.MarketApi
+open Arbitration.Infrastructure.MarketRepository
 open Binance.Net.Interfaces.Clients
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Configuration
@@ -30,12 +30,12 @@ let postgresEnv = {
         
 let private createEnv (services: IServiceProvider) = {
     Postgres = postgresEnv
-    SpreadRepository = postgresSpreadRepository
-    SpreadApi = binanceSpreadApi
+    MarketRepository = postgresSpreadRepository
+    MarketApi = binanceMarketApi
     MarketData = marketData
     BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
     Logger = services.GetRequiredService<ILogger>()
-    Cache = Unchecked.defaultof<Cache>
+    MarketCache = Unchecked.defaultof<Cache>
     Config = config
 }
     

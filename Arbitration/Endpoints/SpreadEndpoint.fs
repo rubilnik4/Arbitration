@@ -15,9 +15,8 @@ let private spreadPath =
 let private getLastSpread env : EndpointHandler = 
     fun ctx -> task {
         match ctx.TryGetQueryValue "assetA", ctx.TryGetQueryValue "assetB"  with
-        | Some assetA, Some assetB ->
-            let spreadAsset = { AssetA = assetA; AssetB = assetB }
-            let! result = spreadQuery env spreadAsset
+        | Some assetA, Some assetB ->            
+            let! result = spreadQuery env (assetA, assetB)
             return!
                 match result with
                 | Ok spread ->
@@ -32,7 +31,7 @@ let private computeSpread env : EndpointHandler  =
     fun ctx -> task {
         match! ctx.BindAndValidateJson<AssetSpreadRequest>() with
             | ModelValidationResult.Valid request ->
-                let spreadAsset = { AssetA = request.AssetA; AssetB = request.AssetB }
+                let spreadAsset = AssetSpreadId (request.AssetA, request.AssetB )
                 let state = SpreadState.Empty
                 let! result, _ = spreadCommand env state spreadAsset       
                 

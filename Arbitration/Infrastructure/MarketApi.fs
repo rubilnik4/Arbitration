@@ -1,16 +1,16 @@
-module Arbitration.Infrastructure.SpreadApi
+module Arbitration.Infrastructure.MarketApi
 
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Prices
    
-let private getPrice env asset = task {
+let private getPrice env assetId = task {
     try       
         let client = env.BinanceRestClient
-        let! result = client.UsdFuturesApi.ExchangeData.GetPriceAsync asset
+        let! result = client.UsdFuturesApi.ExchangeData.GetPriceAsync assetId
         match result.Success with
         | true ->
             let price = {
-                Asset = asset
+                Asset = assetId
                 Value = result.Data.Price
                 Time = result.Data.Timestamp |> DateTimeUtils.withUtcDatetime
             }
@@ -21,6 +21,6 @@ let private getPrice env asset = task {
         return $"Binance API error: {ex.Message}" |> Error
 }
 
-let binanceSpreadApi : SpreadApi = {
+let binanceMarketApi : MarketApi = {
     GetPrice = getPrice
 }

@@ -1,4 +1,4 @@
-module Arbitration.Infrastructure.SpreadRepository
+module Arbitration.Infrastructure.MarketRepository
 
 open System
 open System.Threading.Tasks
@@ -57,7 +57,7 @@ let saveSpread env spread = task {
         ]
     ]
 
-    let! _ = 
+    let! _ =
         env.Source.ConnectionString
         |> Sql.connect
         |> Sql.executeTransactionAsync parameters
@@ -65,7 +65,7 @@ let saveSpread env spread = task {
     return spreadId
 }
 
-let getLastPrice env asset = task {
+let getLastPrice env assetId = task {
     let! result =
         Sql.connect env.Source.ConnectionString
         |> Sql.query """
@@ -75,7 +75,7 @@ let getLastPrice env asset = task {
             ORDER BY time DESC
             LIMIT 1
         """
-        |> Sql.parameters [ "@asset", Sql.string asset ]
+        |> Sql.parameters [ "@asset", Sql.string assetId ]
         |> Sql.executeAsync (fun read ->
             {
                 Asset = read.string "asset"
@@ -86,10 +86,11 @@ let getLastPrice env asset = task {
 
     match result with    
     | head::_ -> return Ok head
-    | [] -> return Error $"Database price for asset '{asset}' not found"
+    | [] -> return Error $"Database price for asset '{assetId}' not found"
 }
 
-let getLastSpread env spreadAsset = task {
+let getLastSpread env spreadAssetId = task {
+    let assetIdA, assetIdB = spreadAssetId
     let! result =
         Sql.connect env.Source.ConnectionString
         |> Sql.query """
@@ -104,8 +105,8 @@ let getLastSpread env spreadAsset = task {
             LIMIT 1
         """
         |> Sql.parameters [
-            "@asset_a", Sql.string spreadAsset.AssetA
-            "@asset_b", Sql.string spreadAsset.AssetB
+            "@asset_a", Sql.string assetIdA
+            "@asset_b", Sql.string assetIdB
         ]
         |> Sql.executeAsync (fun read ->
             {
@@ -126,10 +127,10 @@ let getLastSpread env spreadAsset = task {
 
     match result with    
     | head::_ -> return Ok head
-    | [] -> return Error $"Spread for assets '{spreadAsset.AssetA}' and '{spreadAsset.AssetB}' not found"
+    | [] -> return Error $"Spread for assets '{assetIdA}' and '{assetIdB}' not found"
 }
 
-let postgresSpreadRepository : SpreadRepository = {
+let postgresSpreadRepository : MarketRepository = {
     SaveSpread =
         fun env spread ->
             tryDb(fun () -> saveSpread env spread)

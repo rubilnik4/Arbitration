@@ -4,53 +4,63 @@ open System
 open System.Net.Http
 open System.Threading.Tasks
 open Arbitration.Domain.Models.Assets
+open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads
 open Arbitration.Application.Configurations
 open Arbitration.Domain.Types
 open Binance.Net.Interfaces.Clients
+open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Logging
 open Npgsql
 
 type Env = {   
-    Postgres: PostgresEnv
-    SpreadRepository: SpreadRepository
-    SpreadApi: SpreadApi
+    Postgres: Postgres
+    MarketRepository: MarketRepository
+    MarketApi: MarketApi
     MarketData: MarketData
-    BinanceRestClient: IBinanceRestClient 
-    Logger: ILogger
-    Cache: Cache
+    MarketCache: MarketCache
+    BinanceRestClient: IBinanceRestClient
+    Cache: IMemoryCache
+    Logger: ILogger    
     Config: Config
 }
 
-and PostgresEnv = {
+and Postgres = {
     Source: NpgsqlDataSource
 }
 
-and SpreadApi = {
+and MarketApi = {
     GetPrice: Env -> AssetId -> Task<PriceResult>
 }
 
-and SpreadRepository = {
-    SaveSpread: PostgresEnv -> Spread -> Task<SpreadIdResult>
-    GetLastPrice: PostgresEnv -> AssetId -> Task<PriceResult>
-    GetLastSpread: PostgresEnv -> AssetSpread -> Task<SpreadResult>
+and MarketRepository = {
+    SaveSpread: Postgres -> Spread -> Task<SpreadIdResult>
+    GetLastPrice: Postgres -> AssetId -> Task<PriceResult>
+    GetLastSpread: Postgres -> AssetSpreadId -> Task<SpreadResult>
 }
 
 and MarketData = {
     GetPrice: Env -> AssetId -> Task<PriceResult>
     GetLastPrice: Env -> AssetId -> Task<PriceResult>
-    GetLastSpread: Env -> AssetSpread -> Task<SpreadResult>
+    GetLastSpread: Env -> AssetSpreadId -> Task<SpreadResult>
 }
 
-and Cache ={
-    Set: string -> decimal -> unit
+and MarketCache = {
+    LastPrice : Cache<AssetId, Price>
+    LastSpread : Cache<AssetSpreadId, Spread>
 }
 
-type ArbitrationQuery<'env, 'input, 'output> =
-    'env -> 'input -> Task<'output>
+and Cache<'TKey, 'T> = {
+    TryGet: Env -> 'TKey -> MarketResult<'T>
+    Set: Env -> 'T -> MarketResult<'T>
+    Remove: Env -> 'TKey -> MarketResult<unit>
+}
+   
+type Query<'input, 'output> =
+    Env -> 'input -> Task<'output>
     
-type ArbitrationCommand<'env, 'state, 'input, 'output> =
-    'env -> 'state -> 'input -> Task<'output * 'state>
+type Command<'state, 'input, 'output> =
+    Env -> 'state -> 'input -> Task<'output * 'state>
     
 
     

@@ -1,10 +1,8 @@
 module Arbitration.Application.Commands.SpreadCommand
 
-open System.Threading.Tasks
 open Arbitration.Application.Commands.Commands
 open Arbitration.Application.Configurations
 open Arbitration.Domain.Models.Assets
-open Arbitration.Domain.Types
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads
 open Arbitration.Application.Interfaces
@@ -19,39 +17,59 @@ let private getSpread (priceA: Price) (priceB: Price) =
         Time = DateTimeUtils.getUtcDatetime()
     }
 
-let private getPrice env asset : Task<PriceResult> = task {
-    let! marketPriceResult = env.MarketData.GetPrice env asset
+let private getPrice env assetId = task {
+    let! marketPriceResult = env.MarketData.GetPrice env assetId
     match marketPriceResult with
     | Ok marketPrice ->
         return marketPrice |> Ok
     | Error _ ->    
-        let! lastPriceResult = env.MarketData.GetLastPrice env asset
+        let! lastPriceResult = env.MarketData.GetLastPrice env assetId
         match lastPriceResult with
         | Ok lastPrice ->                
             return lastPrice |> Ok
         | Error _ ->
-            return $"No data available at all for {asset}" |> Error        
+            return $"No data available at all for {assetId}" |> Error        
 } 
 
-let private updateState (config: ProjectConfig) spread state =    
-    let updatedHistory = spread :: state.SpreadHistory |> List.take config.MaxHistorySize
-    let isThresholdExceeded = spread > config.SpreadThreshold
+let private updateState config spread state =    
+    let updatedHistory = spread.Value :: state.SpreadHistory |> List.take config.MaxHistorySize
+    let isThresholdExceeded = spread.Value > config.SpreadThreshold
     { state with
-        LastSpread = Some spread
+        LastSpread = Some spread.Value
         SpreadHistory = updatedHistory
-        IsThresholdExceeded = isThresholdExceeded }   
+        IsThresholdExceeded = isThresholdExceeded }
+
+let removeSpreadCache env spread =
+    let assetSpreadId = getAssetSpreadId spread
+    env.MarketCache.LastPrice.Remove env spread.PriceA.Asset |> ignore
+    env.MarketCache.LastPrice.Remove env spread.PriceB.Asset |> ignore    
+    env.MarketCache.LastSpread.Remove env assetSpreadId |> ignore
+    
+let private saveSpread env spread = task {
+    let! spreadIdResult =  env.MarketRepository.SaveSpread env.Postgres spread
+    match spreadIdResult with
+    | Ok spreadId ->
+        removeSpreadCache env spread
+        return Ok spreadId
+    | Error e -> 
+        return Error e
+}
 
 let spreadCommand : SpreadCommand =
     fun env state input -> task {
-        let spreadAssets = normalizeAsset input
-        let! priceAResult = spreadAssets.AssetA |> getPrice env 
-        let! priceBResult = spreadAssets.AssetB |> getPrice env 
+        let assetA, assetB = normalizeSpreadAsset input
+        let! priceAResult = assetA |> getPrice env 
+        let! priceBResult = assetB |> getPrice env 
 
         match priceAResult, priceBResult with
         | Ok priceA, Ok priceB ->            
             let spread = getSpread priceA priceB
-            let newState = state |> updateState env.Config.Project spread.Value 
-            return spread |> Ok, newState
+            match! saveSpread env spread with
+            | Ok _ ->
+                let newState = state |> updateState env.Config.Project spread 
+                return spread |> Ok, newState
+            | Error e ->
+                return e |> Error, state            
         | Error e, _
         | _, Error e ->
             return $"Error fetching prices: {e}, state {state}" |> Error, state
