@@ -22,7 +22,7 @@ let private getLastSpread env : EndpointHandler =
                 | Ok spread ->
                     ctx.Write <| Ok spread
                 | Error error ->
-                    ctx.Write <| BadRequest {| Error = error |}
+                    ctx.Write <| InternalServerError {| Error = error |}
         | _, _ ->
             return! ctx.Write <| BadRequest "AssetId not found"        
     }
@@ -37,8 +37,10 @@ let private computeSpread env : EndpointHandler  =
                 
                 return!
                     match result with
-                    | Ok spread -> ctx.Write <| Ok spread
-                    | Error error -> ctx.Write <| BadRequest {| Error = error |}
+                    | Ok spread ->
+                        ctx.Write <| Ok spread
+                    | Error error ->
+                        ctx.Write <| InternalServerError {| Error = error |}
             | ModelValidationResult.Invalid (_, errors) ->
                 return! ctx.Write <| BadRequest errors.All
                 

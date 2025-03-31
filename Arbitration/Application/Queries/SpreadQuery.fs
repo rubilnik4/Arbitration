@@ -1,13 +1,12 @@
 module Arbitration.Application.Queries.SpreadQuery
 
-open System.Threading.Tasks
 open Arbitration.Application.Interfaces
-open Arbitration.Application.Queries.Queries
-open Arbitration.Domain.Models
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Types
+open Microsoft.Extensions.Logging
 
-let spreadQuery : SpreadQuery =
+let spreadQuery : Query<AssetSpreadId, SpreadResult> =
     fun env input ->
-        normalizeSpreadAsset input
-        |> env.MarketData.GetLastSpread env 
+        let assetSpreadId = normalizeSpreadAsset input
+        env.Logger.LogInformation("Execute spread query for assets: {assetSpreadId}", assetSpreadId)
+        env.MarketData.GetLastSpread env assetSpreadId

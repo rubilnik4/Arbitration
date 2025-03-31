@@ -34,9 +34,9 @@ and MarketApi = {
 }
 
 and MarketRepository = {
-    SaveSpread: Postgres -> Spread -> Task<SpreadIdResult>
-    GetLastPrice: Postgres -> AssetId -> Task<PriceResult>
-    GetLastSpread: Postgres -> AssetSpreadId -> Task<SpreadResult>
+    SaveSpread: Env -> Spread -> Task<SpreadIdResult>
+    GetLastPrice: Env -> AssetId -> Task<PriceResult>
+    GetLastSpread: Env -> AssetSpreadId -> Task<SpreadResult>
 }
 
 and MarketData = {

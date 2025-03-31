@@ -1,20 +1,12 @@
 module Arbitration.Infrastructure.MarketRepository
 
 open System
-open System.Threading.Tasks
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Spreads
 open Arbitration.Domain.Models.Prices
-open Arbitration.Domain.Models.Assets
+open Arbitration.Domain.Types
+open Microsoft.Extensions.Logging
 open Npgsql.FSharp
- 
-let private tryDb (action: unit -> Task<'a>)  : Task<Result<'a, string>> = task {
-    try
-        let! result = action()
-        return Ok result
-    with ex ->
-        return Error $"DB error: {ex.Message}"
-}
 
 let private insertPrice id price =
     """
@@ -85,8 +77,8 @@ let getLastPrice env assetId = task {
         )
 
     match result with    
-    | head::_ -> return Ok head
-    | [] -> return Error $"Database price for asset '{assetId}' not found"
+    | head::_ -> return head |> Ok
+    | [] -> return DatabaseNotFound $"Price for asset '{assetId}' not found" |> Error
 }
 
 let getLastSpread env spreadAssetId = task {
@@ -126,22 +118,43 @@ let getLastSpread env spreadAssetId = task {
         )
 
     match result with    
-    | head::_ -> return Ok head
-    | [] -> return Error $"Spread for assets '{assetIdA}' and '{assetIdB}' not found"
+    | head::_ -> return head |> Ok 
+    | [] -> return DatabaseNotFound $"Spread for assets '{assetIdA}' and '{assetIdB}' not found" |> Error
 }
 
 let postgresSpreadRepository : MarketRepository = {
     SaveSpread =
-        fun env spread ->
-            tryDb(fun () -> saveSpread env spread)
+        fun env spread -> task {
+            let spreadKey = getSpreadKey spread
+            try                
+                env.Logger.LogDebug("Saving spread {spread} to database", spreadKey)
+                let! spreadId = saveSpread env.Postgres spread
+                env.Logger.LogDebug("Spread {spread} saved successfully to database", spreadKey)
+                return spreadId |> Ok
+            with ex ->
+                env.Logger.LogError(ex, "Failed to save spread {spread} to database", spreadKey)
+                return DatabaseError ($"Failed to save spread {spreadKey}") |> Error
+        }          
     GetLastPrice =
-        fun env asset -> task {
-            let! result = tryDb(fun () -> (getLastPrice env asset))
-            return result |> Result.bind id
+        fun env assetId -> task {
+            try                
+                env.Logger.LogDebug("Getting last price {assetId} from database", assetId)
+                let! result = getLastPrice env.Postgres assetId
+                env.Logger.LogDebug("Last price {assetId} get successfully", assetId)
+                return result
+            with ex ->
+                env.Logger.LogError(ex, "Failed to get last price {assetId}", assetId)
+                return DatabaseError ($"Failed to get last price {assetId}") |> Error
         }
     GetLastSpread =
-        fun env spreadAsset -> task {
-            let! result = tryDb(fun () -> (getLastSpread env spreadAsset))
-            return result |> Result.bind id
+        fun env spreadAssetId -> task {          
+            try                
+                env.Logger.LogDebug("Getting last spread {spreadAssetId} from database", spreadAssetId)
+                let! result = getLastSpread env.Postgres spreadAssetId
+                env.Logger.LogDebug("Last spread {spreadAssetId} get successfully", spreadAssetId)
+                return result
+            with ex ->
+                env.Logger.LogError(ex, "Failed to get last spread {spreadAssetId}", spreadAssetId)
+                return DatabaseError ($"Failed to get last spread {spreadAssetId}") |> Error
         }
 }

@@ -13,7 +13,7 @@ let private getLastPrice env assetId = task {
     | Ok price ->
         return price |> Ok
     | Error _ ->
-        match! marketRepository.GetLastPrice env.Postgres assetId with
+        match! marketRepository.GetLastPrice env assetId with
         | Ok price ->
             lastPriceCache.Set env price |> ignore
             return price |> Ok
@@ -28,7 +28,7 @@ let private getLastSpread env spreadAssetId = task {
     | Ok spread ->
         return spread |> Ok
     | Error _ ->
-        match! spreadRepository.GetLastSpread env.Postgres spreadAssetId with
+        match! spreadRepository.GetLastSpread env spreadAssetId with
         | Ok spread ->
             lastSpreadCache.Set env spread |> ignore
             return spread |> Ok

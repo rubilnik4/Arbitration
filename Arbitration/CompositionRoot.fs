@@ -5,11 +5,13 @@ open Arbitration.Application.Configurations
 open Arbitration.Application.Interfaces
 open Arbitration.Controllers.PriceEndpoint
 open Arbitration.Controllers.SpreadEndpoint
+open Arbitration.Infrastructure.MarketCache
 open Arbitration.Infrastructure.MarketData
 open Arbitration.Infrastructure.MarketApi
 open Arbitration.Infrastructure.MarketRepository
 open Binance.Net.Interfaces.Clients
 open Microsoft.AspNetCore.Builder
+open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
@@ -33,9 +35,10 @@ let private createEnv (services: IServiceProvider) = {
     MarketRepository = postgresSpreadRepository
     MarketApi = binanceMarketApi
     MarketData = marketData
+    MarketCache = memoryMarketCache
     BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
-    Logger = services.GetRequiredService<ILogger>()
-    MarketCache = Unchecked.defaultof<Cache>
+    Cache = services.GetRequiredService<IMemoryCache>()
+    Logger = services.GetRequiredService<ILogger>()    
     Config = config
 }
     
@@ -62,6 +65,7 @@ let configureServices (services: IServiceCollection) =
         .AddRouting()
         .AddOxpecker()
         .AddBinance()
+        .AddMemoryCache()
         .AddEndpointsApiExplorer()
         .AddSwaggerGen(fun c ->
             c.SwaggerDoc("v1", OpenApiInfo(

@@ -19,7 +19,7 @@ let private getLastPrice env : EndpointHandler =
                 | Ok price ->
                     ctx.Write <| Ok price
                 | Error error ->
-                    ctx.Write <| BadRequest {| Error = error |}
+                    ctx.Write <| InternalServerError {| Error = error |}
         | None ->
             return! ctx.Write <| BadRequest "AssetId not found"        
     }
