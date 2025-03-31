@@ -3,6 +3,7 @@ module Arbitration.Controllers.PriceEndpoint
 open Arbitration.Application.Queries.PriceQuery
 open Arbitration.Controllers.Routes
 open Arbitration.Domain.Models.Assets
+open Arbitration.Domain.Types
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 
@@ -18,6 +19,8 @@ let private getLastPrice env : EndpointHandler =
                 match result with
                 | Ok price ->
                     ctx.Write <| Ok price
+                | Error (NotFound message) ->
+                    ctx.Write <| NotFound {| Message = message |}
                 | Error error ->
                     ctx.Write <| InternalServerError {| Error = error |}
         | None ->

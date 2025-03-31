@@ -5,10 +5,8 @@ open Arbitration.Domain.Models.Spreads
 
 type MarketError =   
     | NotFound of string 
-    | DatabaseError of message: string 
-    | DatabaseNotFound of message: string
-    | CacheError of message: string 
-    | CacheNotFound of message: string
+    | DatabaseError of message: string    
+    | CacheError of message: string     
     | ApiError of provider: string * code: int * message: string 
     | ServiceUnavailable of service: string 
     | Unknown

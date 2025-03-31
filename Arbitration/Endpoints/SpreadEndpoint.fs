@@ -6,6 +6,7 @@ open Arbitration.Application.Queries.SpreadQuery
 open Arbitration.Controllers.Routes
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Spreads
+open Arbitration.Domain.Types
 open Oxpecker
 open type Microsoft.AspNetCore.Http.TypedResults
 
@@ -21,6 +22,8 @@ let private getLastSpread env : EndpointHandler =
                 match result with
                 | Ok spread ->
                     ctx.Write <| Ok spread
+                | Error (NotFound message) ->
+                    ctx.Write <| NotFound {| Message = message |}
                 | Error error ->
                     ctx.Write <| InternalServerError {| Error = error |}
         | _, _ ->
