@@ -19,20 +19,22 @@ open Microsoft.OpenApi.Models
 open Npgsql
 open Oxpecker
 
-let private config =
+let private getConfig() =
     ConfigurationBuilder()
         .AddJsonFile("appsettings.json")
         .AddEnvironmentVariables()
         .Build()
         .Get<Config>()
    
-let private createInfra (services: IServiceProvider) = {
-    Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
-    BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
-    Cache = services.GetRequiredService<IMemoryCache>()
-    Logger = services.GetRequiredService<ILogger>()    
-    Config = config
-}
+let private createInfra (services: IServiceProvider) = 
+    let config = services.GetRequiredService<Config>()
+    {
+        Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
+        BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
+        Cache = services.GetRequiredService<IMemoryCache>()
+        Logger = services.GetRequiredService<ILogger>()    
+        Config = config
+    }
 
 let private createEnv (services: IServiceProvider) = {
     Infra = createInfra services
@@ -66,6 +68,7 @@ let configureServices (services: IServiceCollection) =
         .AddOxpecker()
         .AddBinance()
         .AddMemoryCache()
+        .AddSingleton(getConfig)
         .AddEndpointsApiExplorer()
         .AddSwaggerGen(fun c ->
             c.SwaggerDoc("v1", OpenApiInfo(

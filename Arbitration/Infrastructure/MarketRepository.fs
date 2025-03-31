@@ -2,6 +2,7 @@ module Arbitration.Infrastructure.MarketRepository
 
 open System
 open Arbitration.Application.Interfaces
+open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Spreads
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.DomainTypes
@@ -83,7 +84,7 @@ let getLastPrice env assetId = task {
 }
 
 let getLastSpread env spreadAssetId = task {
-    let assetIdA, assetIdB = spreadAssetId
+    let spreadKey = getAssetSpreadKey spreadAssetId
     let! result =
         env.Postgres.ConnectionString
         |> Sql.connect
@@ -94,34 +95,29 @@ let getLastSpread env spreadAssetId = task {
             FROM spreads s
             JOIN prices pa ON s.price_a_id = pa.id
             JOIN prices pb ON s.price_b_id = pb.id
-            WHERE pa.asset = @asset_a AND pb.asset = @asset_b
+            WHERE asset_spread_id = @spread_key
             ORDER BY s.spread_time DESC
             LIMIT 1
         """
-        |> Sql.parameters [
-            "@asset_a", Sql.string assetIdA
-            "@asset_b", Sql.string assetIdB
-        ]
-        |> Sql.executeAsync (fun read ->
-            {
-                Value = read.decimal "spread_value"
-                Time = read.dateTime "spread_time"
-                PriceA = {
-                    Asset = read.string "asset_a"
-                    Value = read.decimal "price_a"
-                    Time = read.dateTime "time_a"
-                }
-                PriceB = {
-                    Asset = read.string "asset_b"
-                    Value = read.decimal "price_b"
-                    Time = read.dateTime "time_b"
-                }
+        |> Sql.parameters [ "@spread_key", Sql.string spreadKey ]
+        |> Sql.executeAsync (fun read -> {
+            Value = read.decimal "spread_value"
+            Time = read.dateTime "spread_time"
+            PriceA = {
+                Asset = read.string "asset_a"
+                Value = read.decimal "price_a"
+                Time = read.dateTime "time_a"
             }
-        )
+            PriceB = {
+                Asset = read.string "asset_b"
+                Value = read.decimal "price_b"
+                Time = read.dateTime "time_b"
+            }
+        })
 
     match result with    
-    | head::_ -> return head |> Ok 
-    | [] -> return NotFound $"Spread for assets '{assetIdA}' and '{assetIdB}' not found" |> Error
+    | head::_ -> return head |> Ok
+    | [] -> return NotFound $"Spread for assets '{fst spreadAssetId}' and '{snd spreadAssetId}' not found" |> Error
 }
 
 let postgresSpreadRepository : MarketRepository = {

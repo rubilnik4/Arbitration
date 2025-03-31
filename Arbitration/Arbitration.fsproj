@@ -25,6 +25,8 @@
         <Compile Include="Endpoints\Routes.fs" />
         <Compile Include="Endpoints\PriceEndpoint.fs" />
         <Compile Include="Endpoints\SpreadEndpoint.fs" />
+        <Compile Include="Migrations\001_create_prices_and_spreads.sql" />
+        <Compile Include="Migrations\Migration.fs" />
         <Compile Include="CompositionRoot.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

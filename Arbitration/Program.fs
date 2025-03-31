@@ -2,21 +2,24 @@ module Arbitration.Program
 
 #nowarn "20"
 open Arbitration.Application.CompositionRoot
-open Arbitration.Application.Interfaces
-open Arbitration.Controllers.PriceEndpoint
-open Arbitration.Controllers.SpreadEndpoint
+open Arbitration.Application.Configurations
+open Arbitration.Migrations
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.Hosting
-open Microsoft.OpenApi.Models
-open Oxpecker
 
    
 [<EntryPoint>]
 let main args =
-    let builder = WebApplication.CreateBuilder(args)
-    configureServices builder.Services
-    let app = builder.Build()
-    configureApp app
-    app.Run()
-    0
+    task {
+        let builder = WebApplication.CreateBuilder(args)
+        configureServices builder.Services
+        let app = builder.Build()
+        
+        do! Migration.applyMigrations app.Services.GetRequiredService<Config>()
+        configureApp app
+        
+        do! app.RunAsync()
+        return 0
+    }
+    |> Async.AwaitTask
+    |> Async.RunSynchronously
