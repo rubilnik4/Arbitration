@@ -16,7 +16,7 @@ let applyMigrations connectionString = task {
             applied_at TIMESTAMP NOT NULL DEFAULT NOW()
         );
     """, conn)
-    do! ensureTable.ExecuteNonQueryAsync() |> ignore
+    let! _ = ensureTable.ExecuteNonQueryAsync()
 
     let applied = ResizeArray<string>()
 
@@ -36,11 +36,11 @@ let applyMigrations connectionString = task {
             let sql = File.ReadAllText file
             use tx = conn.BeginTransaction()
             use cmd = new NpgsqlCommand(sql, conn, tx)
-            do! cmd.ExecuteNonQueryAsync() |> ignore
+            let! _ = cmd.ExecuteNonQueryAsync()
 
             use mark = new NpgsqlCommand("INSERT INTO __migrations (name) VALUES (@name)", conn, tx)
             mark.Parameters.AddWithValue("@name", name) |> ignore
-            do! mark.ExecuteNonQueryAsync() |> ignore
+            let! _ = mark.ExecuteNonQueryAsync()
 
             do! tx.CommitAsync()
             printfn $"✅ Applied migration: {name}"

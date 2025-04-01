@@ -11,8 +11,7 @@
     <ItemGroup>
         <Compile Include="Configurations.fs" />
         <Compile Include="Environments.fs" />
-        <Compile Include="SpreadTest.fs" />
-        <Compile Include="Program.fs"/>
+        <Compile Include="Tests\SpreadTest.fs" />
     </ItemGroup>
 
     <ItemGroup>

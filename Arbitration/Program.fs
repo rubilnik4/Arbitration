@@ -15,7 +15,8 @@ let main args =
         configureServices builder.Services
         let app = builder.Build()
         
-        do! Migration.applyMigrations app.Services.GetRequiredService<Config>()
+        let connectionString = app.Services.GetRequiredService<Config>().Postgres.ConnectionString
+        do! Migration.applyMigrations connectionString
         configureApp app
         
         do! app.RunAsync()
