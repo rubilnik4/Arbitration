@@ -48,8 +48,7 @@ let private computeSpread env : EndpointHandler  =
             env.Infra.Logger.LogInformation("Computing spread for assets: {Assets}", spreadAssetId)
             
             let spreadAsset = AssetSpreadId (request.AssetA, request.AssetB)
-            let state = SpreadState.Empty
-            let! result, _ = spreadCommand env state spreadAsset       
+            let! result, _ = spreadCommand env SpreadState.Empty spreadAsset       
 
             return!
                 match result with

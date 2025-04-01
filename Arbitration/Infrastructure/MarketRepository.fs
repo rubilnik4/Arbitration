@@ -51,8 +51,8 @@ let saveSpread env spread = task {
     ]
 
     let! _ =
-        env.Postgres.ConnectionString
-        |> Sql.connect
+        env.Postgres
+        |> Sql.fromDataSource
         |> Sql.executeTransactionAsync parameters
 
     return spreadId
@@ -60,8 +60,8 @@ let saveSpread env spread = task {
 
 let getLastPrice env assetId = task {
     let! result =
-        env.Postgres.ConnectionString
-        |> Sql.connect 
+        env.Postgres
+        |> Sql.fromDataSource
         |> Sql.query """
             SELECT id, asset, price, time
             FROM prices
@@ -86,8 +86,8 @@ let getLastPrice env assetId = task {
 let getLastSpread env spreadAssetId = task {
     let spreadKey = getAssetSpreadKey spreadAssetId
     let! result =
-        env.Postgres.ConnectionString
-        |> Sql.connect
+        env.Postgres
+        |> Sql.fromDataSource
         |> Sql.query """
             SELECT s.spread_value, s.spread_time,
                    pa.asset AS asset_a, pa.price AS price_a, pa.time AS time_a,

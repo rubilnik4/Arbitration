@@ -4,8 +4,8 @@ open System.IO
 open Arbitration.Application.Configurations
 open Npgsql
 
-let applyMigrations (config: Config) = task {
-    let connectionString = config.Postgres.ConnectionString
+let applyMigrations connectionString = task {
+    let connectionString = connectionString
     use conn = new NpgsqlConnection(connectionString)
     do! conn.OpenAsync()
 

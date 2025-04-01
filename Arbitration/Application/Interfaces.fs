@@ -1,6 +1,5 @@
 module Arbitration.Application.Interfaces
 
-
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices
 open Arbitration.Domain.Models.Spreads
