@@ -43,7 +43,8 @@ type TestEnvironment() =
             spread.Value |> should be (greaterThan 0m)
             spread.Value |> should equal ((spread.PriceA.Value - spread.PriceB.Value) |> abs)
             getAssetSpreadId spread |> should equal (spreadAsset |> normalizeSpreadAsset)
-        | Error e -> failwith $"Failed compute spread: {e}"
+        | Error e ->
+            failwith $"Failed compute spread: {e}"
     }
 
     // [<Test; Order(2)>]

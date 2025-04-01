@@ -22,7 +22,7 @@ let private insertPrice id price =
             "@id", Sql.uuid id
             "@asset", Sql.string price.Asset
             "@price", Sql.decimal price.Value
-            "@time", Sql.timestamp price.Time
+            "@time", Sql.timestamptz price.Time
         ]
     ]
     
@@ -30,22 +30,24 @@ let saveSpread env spread = task {
     let priceAId = Guid.NewGuid()
     let priceBId = Guid.NewGuid()
     let spreadId = Guid.NewGuid()
-
+    let assetSpreadKey = getSpreadKey spread
+    
     let parameters = [
         insertPrice priceAId spread.PriceA
         insertPrice priceBId spread.PriceB
 
         """
-        INSERT INTO spreads (id, price_a_id, price_b_id, spread_value, spread_time)
-        VALUES (@id, @price_a_id, @price_b_id, @spread_value, @spread_time)
+        INSERT INTO spreads (id, price_a_id, price_b_id, asset_spread_id, spread_value, spread_time)
+        VALUES (@id, @price_a_id, @price_b_id, @asset_spread_id, @spread_value, @spread_time)
         """,
         [
             [
                 "@id", Sql.uuid spreadId
                 "@price_a_id", Sql.uuid priceAId
                 "@price_b_id", Sql.uuid priceBId
+                "asset_spread_id", Sql.string assetSpreadKey
                 "@spread_value", Sql.decimal spread.Value
-                "@spread_time", Sql.timestamp spread.Time
+                "@spread_time", Sql.timestamptz spread.Time
             ]
         ]
     ]
@@ -83,8 +85,8 @@ let getLastPrice env assetId = task {
     | [] -> return NotFound $"Price for asset '{assetId}' not found" |> Error
 }
 
-let getLastSpread env spreadAssetId = task {
-    let spreadKey = getAssetSpreadKey spreadAssetId
+let getLastSpread env assetSpreadId = task {
+    let assetSpreadKey = getAssetSpreadKey assetSpreadId
     let! result =
         env.Postgres
         |> Sql.fromDataSource
@@ -95,11 +97,11 @@ let getLastSpread env spreadAssetId = task {
             FROM spreads s
             JOIN prices pa ON s.price_a_id = pa.id
             JOIN prices pb ON s.price_b_id = pb.id
-            WHERE asset_spread_id = @spread_key
+            WHERE asset_spread_id = @asset_spread_id
             ORDER BY s.spread_time DESC
             LIMIT 1
         """
-        |> Sql.parameters [ "@spread_key", Sql.string spreadKey ]
+        |> Sql.parameters [ "@asset_spread_id", Sql.string assetSpreadKey ]
         |> Sql.executeAsync (fun read -> {
             Value = read.decimal "spread_value"
             Time = read.dateTime "spread_time"
@@ -117,7 +119,7 @@ let getLastSpread env spreadAssetId = task {
 
     match result with    
     | head::_ -> return head |> Ok
-    | [] -> return NotFound $"Spread for assets '{fst spreadAssetId}' and '{snd spreadAssetId}' not found" |> Error
+    | [] -> return NotFound $"Spread for assets '{assetSpreadKey}' not found" |> Error
 }
 
 let postgresSpreadRepository : MarketRepository = {

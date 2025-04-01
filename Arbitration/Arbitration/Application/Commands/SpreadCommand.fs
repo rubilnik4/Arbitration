@@ -36,7 +36,7 @@ let private getPrice env assetId = task {
 
 let private updateState env spread state =
     let config = env.Config.Project
-    let updatedHistory = spread.Value :: state.SpreadHistory |> List.take config.MaxHistorySize
+    let updatedHistory = spread.Value :: state.SpreadHistory |> List.truncate config.MaxHistorySize
     let isThresholdExceeded = spread.Value > config.SpreadThreshold
     if isThresholdExceeded then
         let assetSpreadId = getSpreadKey spread

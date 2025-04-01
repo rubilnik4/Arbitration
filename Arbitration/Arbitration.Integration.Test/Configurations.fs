@@ -4,8 +4,8 @@ open System
 open Arbitration.Application.Configurations
 
 let getAssetConfig() = {
-    AssetA = "BTCUSDT_QUARTER"
-    AssetB = "BTCUSDT_BI-QUARTER"
+    AssetA = "BTCUSDT_250627"
+    AssetB = "BTCUSDT_250926"
 }
 
 let getProjectConfig() = {
