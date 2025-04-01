@@ -15,19 +15,17 @@ open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
-open Microsoft.OpenApi.Models
 open Npgsql
 open Oxpecker
 
-let private getConfig() =
+let private configuration =
     ConfigurationBuilder()
-        .AddJsonFile("appsettings.json")
+        .AddJsonFile("appsettings.json", optional = false)
         .AddEnvironmentVariables()
         .Build()
-        .Get<Config>()
    
 let private createInfra (services: IServiceProvider) = 
-    let config = services.GetRequiredService<Config>()
+    let config = services.GetRequiredService<AppConfig>()
     {
         Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
         BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
@@ -44,10 +42,18 @@ let private createEnv (services: IServiceProvider) = {
     Cache = memoryMarketCache   
 }  
     
-let getEndpoints env =
+let private getEndpoints env =
     List.Empty
     |> List.append (priceEndpoints env)
     |> List.append (spreadEndpoints env)
+    
+let private configureOptions (services: IServiceCollection) =
+    services
+        .AddOptions<AppConfig>()
+        .Bind(configuration.GetSection("AppConfig"))      
+        .ValidateDataAnnotations()
+        .ValidateOnStart()
+    |> ignore
     
 let configureApp (appBuilder: IApplicationBuilder) =
     let env = createEnv(appBuilder.ApplicationServices)
@@ -55,11 +61,6 @@ let configureApp (appBuilder: IApplicationBuilder) =
     appBuilder
         .UseRouting()
         .UseOxpecker(getEndpoints env)
-        .UseSwagger()
-        .UseSwaggerUI(fun c ->
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Spread API V1")
-            //c.RoutePrefix <- ""
-        )
     |> ignore
 
 let configureServices (services: IServiceCollection) =
@@ -67,15 +68,8 @@ let configureServices (services: IServiceCollection) =
         .AddRouting()
         .AddOxpecker()
         .AddBinance()
-        .AddMemoryCache()
-        .AddSingleton(getConfig)
+        .AddMemoryCache()       
         .AddEndpointsApiExplorer()
-        .AddSwaggerGen(fun c ->
-            c.SwaggerDoc("v1", OpenApiInfo(
-                Title = "Spread API",
-                Version = "v1",
-                Description = "Сервис для вычисления спреда между двумя активами"
-            ))            
-            //c.CustomSchemaIds _.Name
-    )
+        .Configure<AppConfig>(configuration.GetSection("AppConfig"))
     |> ignore
+    configureOptions services

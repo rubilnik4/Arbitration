@@ -13,9 +13,10 @@ let main args =
     task {
         let builder = WebApplication.CreateBuilder(args)
         configureServices builder.Services
+        
         let app = builder.Build()
         
-        let connectionString = app.Services.GetRequiredService<Config>().Postgres.ConnectionString
+        let connectionString = app.Services.GetRequiredService<AppConfig>().Postgres.ConnectionString
         do! Migration.applyMigrations connectionString
         configureApp app
         

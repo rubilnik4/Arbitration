@@ -14,7 +14,7 @@ open Arbitration.Domain.DomainTypes
 type Infra = {
     Logger: ILogger
     Cache: IMemoryCache
-    Config: Config
+    Config: AppConfig
     Postgres: NpgsqlDataSource
     BinanceRestClient: IBinanceRestClient
 }
