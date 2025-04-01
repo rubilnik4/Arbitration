@@ -22,6 +22,7 @@
         <Compile Include="Infrastructure\MarketApi.fs" />
         <Compile Include="Infrastructure\Caches\MarketCacheKeys.fs" />
         <Compile Include="Infrastructure\Caches\MarketCache.fs" />
+        <Compile Include="Jobs\SpreadJob.fs" />
         <Compile Include="Endpoints\Routes.fs" />
         <Compile Include="Endpoints\PriceEndpoint.fs" />
         <Compile Include="Endpoints\SpreadEndpoint.fs" />
@@ -29,7 +30,9 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <Compile Include="Migrations\Migration.fs" />
-        <Compile Include="CompositionRoot.fs" />
+        <Compile Include="Composition\JobsConfig.fs" />
+        <Compile Include="Composition\OptionsConfig.fs" />
+        <Compile Include="Composition\CompositionRoot.fs" />        
         <Compile Include="Program.fs" />
     </ItemGroup>
     
@@ -39,6 +42,7 @@
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
       <PackageReference Include="Oxpecker" Version="1.2.0" />
+      <PackageReference Include="Quartz.AspNetCore" Version="3.14.0" />
     </ItemGroup>
 
 </Project>

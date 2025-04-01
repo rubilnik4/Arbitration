@@ -45,10 +45,9 @@ let private computeSpread env : EndpointHandler  =
         match! ctx.BindAndValidateJson<AssetSpreadRequest>() with
         | ModelValidationResult.Valid request ->
             let spreadAssetId = AssetSpreadId(request.AssetA, request.AssetB)
-            env.Infra.Logger.LogInformation("Computing spread for assets: {Assets}", spreadAssetId)
+            env.Infra.Logger.LogInformation("Computing spread for assets: {Assets}", spreadAssetId)            
             
-            let spreadAsset = AssetSpreadId (request.AssetA, request.AssetB)
-            let! result, _ = spreadCommand env SpreadState.Empty spreadAsset       
+            let! result, _ = spreadCommand env SpreadState.Empty spreadAssetId       
 
             return!
                 match result with

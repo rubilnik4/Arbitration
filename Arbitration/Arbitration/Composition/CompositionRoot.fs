@@ -3,6 +3,7 @@ module Arbitration.Application.CompositionRoot
 open System
 open Arbitration.Application.Configurations
 open Arbitration.Application.Interfaces
+open Arbitration.Composition.OptionsConfig
 open Arbitration.Controllers.PriceEndpoint
 open Arbitration.Controllers.SpreadEndpoint
 open Arbitration.Infrastructure.MarketCache
@@ -17,12 +18,6 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open Npgsql
 open Oxpecker
-
-let private configuration =
-    ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional = false)
-        .AddEnvironmentVariables()
-        .Build()
    
 let private createInfra (services: IServiceProvider) = 
     let config = services.GetRequiredService<AppConfig>()
@@ -47,14 +42,6 @@ let private getEndpoints env =
     |> List.append (priceEndpoints env)
     |> List.append (spreadEndpoints env)
     
-let private configureOptions (services: IServiceCollection) =
-    services
-        .AddOptions<AppConfig>()
-        .Bind(configuration.GetSection("AppConfig"))      
-        .ValidateDataAnnotations()
-        .ValidateOnStart()
-    |> ignore
-    
 let configureApp (appBuilder: IApplicationBuilder) =
     let env = createEnv(appBuilder.ApplicationServices)
     
@@ -70,6 +57,5 @@ let configureServices (services: IServiceCollection) =
         .AddBinance()
         .AddMemoryCache()       
         .AddEndpointsApiExplorer()
-        .Configure<AppConfig>(configuration.GetSection("AppConfig"))
     |> ignore
     configureOptions services
