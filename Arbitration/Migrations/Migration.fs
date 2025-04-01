@@ -1,7 +1,6 @@
 module Arbitration.Migrations.Migration
 
 open System.IO
-open Arbitration.Application.Configurations
 open Npgsql
 
 let applyMigrations connectionString = task {
