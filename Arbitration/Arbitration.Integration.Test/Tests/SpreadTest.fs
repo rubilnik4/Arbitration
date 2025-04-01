@@ -4,6 +4,7 @@ open Arbitration.Application.Commands.SpreadCommand
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Spreads
+open Arbitration.Infrastructure.MarketRepository
 open Arbitration.Integration.Test.Environments
 open Arbitration.Migrations
 open FsUnit
@@ -34,30 +35,46 @@ type TestEnvironment() =
     [<Test; Order(1)>]
     member _.``Should save spread successfully``() = task {
         let project = Env.Infra.Config.Project
-        let spreadAsset = AssetSpreadId (project.Assets.AssetA, project.Assets.AssetB)
+        let spreadAssetId = AssetSpreadId (project.Assets.AssetA, project.Assets.AssetB)
         
-        let! result, _ = spreadCommand Env SpreadState.Empty spreadAsset
+        let! result, _ = spreadCommand Env SpreadState.Empty spreadAssetId
         
         match result with
         | Ok spread ->
             spread.Value |> should be (greaterThan 0m)
             spread.Value |> should equal ((spread.PriceA.Value - spread.PriceB.Value) |> abs)
-            getAssetSpreadId spread |> should equal (spreadAsset |> normalizeSpreadAsset)
+            getAssetSpreadId spread |> should equal (spreadAssetId |> normalizeSpreadAsset)
         | Error e ->
             failwith $"Failed compute spread: {e}"
     }
 
-    // [<Test; Order(2)>]
-    // member _.``Should retrieve last price for asset``() = task {
-    //     let! price = getLastPrice testEnv.Env "BTC"
-    //     price |> should be (Ok)
-    // }
-    //
-    // [<Test; Order(3)>]
-    // member _.``Should retrieve last spread``() = task {
-    //     let! spread = getLastSpread testEnv.Env ("BTC", "ETH")
-    //     spread |> should be (Ok)
-    // }
+    [<Test; Order(2)>]
+    member _.``Should retrieve last price for asset``() = task {
+        let project = Env.Infra.Config.Project
+        
+        let! result = getLastPrice Env.Infra project.Assets.AssetA
+        
+        match result with
+        | Ok price ->
+            price.Asset |> should equal project.Assets.AssetA
+            price.Value |> should be (greaterThan 0m)
+        | Error e ->
+            failwith $"Failed get last price: {e}"
+    }
+    
+    [<Test; Order(2)>]
+    member _.``Should retrieve last spread``() = task {
+        let project = Env.Infra.Config.Project
+        let spreadAssetId = AssetSpreadId (project.Assets.AssetA, project.Assets.AssetB)
+        
+        let! result = getLastSpread Env.Infra spreadAssetId
+        
+        match result with
+        | Ok spread ->            
+            spread.Value |> should be (greaterThan 0m)
+        | Error e ->
+            failwith $"Failed get last spread: {e}"
+    }
     
     [<OneTimeTearDown>]
     member _.TearDown() =
