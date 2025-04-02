@@ -1,7 +1,7 @@
 module Arbitration.Application.Commands.SpreadCommand
 
 open System
-open Arbitration.Application.Configurations
+open Arbitration.Application.ProjectConfig
 open Arbitration.Application.Environments.ApplicationTypes
 open Arbitration.Domain.Models.Assets
 open Arbitration.Domain.Models.Prices

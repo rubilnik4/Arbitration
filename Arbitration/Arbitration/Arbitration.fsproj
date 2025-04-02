@@ -10,7 +10,8 @@
         <Compile Include="Domain\Models\Spreads.fs" />
         <Compile Include="Domain\DomainTypes.fs" />
         <Compile Include="Shared\Core\Option.fs" />
-        <Compile Include="Application\Configurations.fs" />
+        <Compile Include="Application\Configurations\ProjectConfig.fs" />
+        <Compile Include="Application\Configurations\OpenTelemetryConfig.fs" />
         <Compile Include="Application\Interfaces.fs" />
         <Compile Include="Application\ApplicationTypes.fs" />
         <Compile Include="Application\Queries\PriceQuery.fs" />
@@ -30,7 +31,8 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <Compile Include="Migrations\Migration.fs" />
-        <Compile Include="Composition\OptionsConfig.fs" />
+        <Compile Include="Composition\CompositionConfig.fs" />
+        <Compile Include="Composition\CompositionTelemetry.fs" />
         <Compile Include="Composition\CompositionRoot.fs" />        
         <Compile Include="Program.fs" />
     </ItemGroup>
@@ -41,7 +43,15 @@
       <PackageReference Include="Hopac" Version="0.5.1" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
+      <PackageReference Include="OpenTelemetry" Version="1.11.2" />
+      <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.2" />
+      <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.11.2-beta.1" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.2" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.1" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.1" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.1" />
       <PackageReference Include="Oxpecker" Version="1.2.0" />
+      <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0" />
     </ItemGroup>
 
 </Project>

@@ -44,8 +44,8 @@ let private spreadJob env =
         let rec processingLoop state = 
             Alt.choose [
                 Ch.take timerCh ^=> fun _ ->
-                    Job.tryInDelay
-                        (fun () -> computeSpread env state |> Job.awaitTask) 
+                    Job.tryInDelay 
+                        (fun () -> computeSpread env state |> Job.awaitTask)
                         processingLoop
                         (fun e -> handleError e state >>= processingLoop)
                 
@@ -59,4 +59,4 @@ let private spreadJob env =
     }
     
 let startSpreadJob env = 
-    Job.startIgnore (spreadJob env) 
+    spreadJob env |> run

@@ -1,4 +1,4 @@
-module Arbitration.Application.Configurations
+module Arbitration.Application.ProjectConfig
 
 open System
 open System.ComponentModel.DataAnnotations

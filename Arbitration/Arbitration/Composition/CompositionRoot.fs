@@ -1,9 +1,9 @@
 module Arbitration.Application.CompositionRoot
 
 open System
-open Arbitration.Application.Configurations
+open Arbitration.Application.ProjectConfig
 open Arbitration.Application.Interfaces
-open Arbitration.Composition.OptionsConfig
+open Arbitration.Composition.CompositionConfig
 open Arbitration.Controllers.PriceEndpoint
 open Arbitration.Controllers.SpreadEndpoint
 open Arbitration.Infrastructure.MarketCache
@@ -16,11 +16,12 @@ open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Options
 open Npgsql
 open Oxpecker
    
 let private createInfra (services: IServiceProvider) = 
-    let config = services.GetRequiredService<AppConfig>()
+    let config = services.GetRequiredService<IOptions<AppConfig>>().Value
     {
         Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
         BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
@@ -51,12 +52,12 @@ let configureApp (appBuilder: IApplicationBuilder) =
     |> ignore    
     env
 
-let configureServices (services: IServiceCollection) =
-    services
+let configureServices (builder: WebApplicationBuilder) =
+    builder.Services
         .AddRouting()
         .AddOxpecker()
         .AddBinance()
         .AddMemoryCache()       
         .AddEndpointsApiExplorer()
     |> ignore
-    configureOptions services
+    configureOptions builder

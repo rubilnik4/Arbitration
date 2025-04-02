@@ -1,7 +1,7 @@
 module Arbitration.Integration.Test.Configurations
 
 open System
-open Arbitration.Application.Configurations
+open Arbitration.Application.ProjectConfig
 
 let getAssetConfig() = {
     AssetA = "BTCUSDT_250627"

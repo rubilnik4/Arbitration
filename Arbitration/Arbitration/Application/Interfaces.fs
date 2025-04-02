@@ -7,7 +7,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Caching.Memory
 open Binance.Net.Interfaces.Clients
 open Npgsql
-open Arbitration.Application.Configurations
+open Arbitration.Application.ProjectConfig
 open System.Threading.Tasks
 open Arbitration.Domain.DomainTypes
 
