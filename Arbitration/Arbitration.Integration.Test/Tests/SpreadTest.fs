@@ -37,7 +37,7 @@ type TestEnvironment() =
         let project = Env.Infra.Config.Project
         let spreadAssetId = AssetSpreadId (project.Assets.AssetA, project.Assets.AssetB)
         
-        let! result, _ = spreadCommand Env SpreadState.Empty spreadAssetId
+        let! result, _ = spreadCommand Env SpreadState.Init spreadAssetId
         
         match result with
         | Ok spread ->

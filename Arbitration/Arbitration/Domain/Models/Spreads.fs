@@ -19,7 +19,7 @@ type SpreadState = {
     IsThresholdExceeded: bool
 }
 with
-    static member Empty = {
+    static member Init = {
         LastSpread = None
         SpreadHistory = []
         IsThresholdExceeded = false

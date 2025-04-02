@@ -48,7 +48,8 @@ let configureApp (appBuilder: IApplicationBuilder) =
     appBuilder
         .UseRouting()
         .UseOxpecker(getEndpoints env)
-    |> ignore
+    |> ignore    
+    env
 
 let configureServices (services: IServiceCollection) =
     services

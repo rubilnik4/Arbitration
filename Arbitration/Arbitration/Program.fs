@@ -3,6 +3,7 @@ module Arbitration.Program
 #nowarn "20"
 open Arbitration.Application.CompositionRoot
 open Arbitration.Application.Configurations
+open Arbitration.Jobs.SpreadJob
 open Arbitration.Migrations
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
@@ -18,8 +19,9 @@ let main args =
         
         let connectionString = app.Services.GetRequiredService<AppConfig>().Postgres.ConnectionString
         do! Migration.applyMigrations connectionString
-        configureApp app
+        let env = configureApp app
         
+        do! startSpreadJob env
         do! app.RunAsync()
         return 0
     }

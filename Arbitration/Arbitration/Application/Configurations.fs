@@ -23,6 +23,9 @@ type ProjectConfig = {
     [<Range(0.0, Double.MaxValue)>]
     SpreadThreshold: decimal
     
+    [<Range(typeof<TimeSpan>, "00:00:00", "01:00:00")>]
+    AssetLoadingDelay: TimeSpan
+    
     [<Required>]
     Assets: AssetConfig
 }

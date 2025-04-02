@@ -30,7 +30,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <Compile Include="Migrations\Migration.fs" />
-        <Compile Include="Composition\JobsConfig.fs" />
         <Compile Include="Composition\OptionsConfig.fs" />
         <Compile Include="Composition\CompositionRoot.fs" />        
         <Compile Include="Program.fs" />
@@ -39,10 +38,10 @@
     <ItemGroup>
       <PackageReference Include="Binance.Net" Version="10.19.0" />
       <PackageReference Remove="FSharp.Core" />
+      <PackageReference Include="Hopac" Version="0.5.1" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Npgsql.FSharp" Version="8.0.0" />
       <PackageReference Include="Oxpecker" Version="1.2.0" />
-      <PackageReference Include="Quartz.AspNetCore" Version="3.14.0" />
     </ItemGroup>
 
 </Project>
