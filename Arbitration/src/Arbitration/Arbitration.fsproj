@@ -20,6 +20,7 @@
         <Compile Include="Application\Queries\MarketData.fs" />
         <Compile Include="Application\Commands\SpreadCommand.fs" />
         <Compile Include="Application\Dtos\Dtos.fs" />
+        <Compile Include="Infrastructure\Activities.fs" />
         <Compile Include="Infrastructure\MarketRepository.fs" />
         <Compile Include="Infrastructure\MarketApi.fs" />
         <Compile Include="Infrastructure\Caches\MarketCacheKeys.fs" />
