@@ -7,6 +7,7 @@ open Arbitration.Jobs.SpreadJob
 open Arbitration.Migrations
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Options
 
    
 [<EntryPoint>]
@@ -17,7 +18,7 @@ let main args =
         
         let app = builder.Build()
         
-        let connectionString = app.Services.GetRequiredService<AppConfig>().Postgres.ConnectionString
+        let connectionString = app.Services.GetRequiredService<IOptions<AppConfig>>().Value.Postgres.ConnectionString
         do! Migration.applyMigrations connectionString
         let env = configureApp app
         

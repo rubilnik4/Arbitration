@@ -21,7 +21,8 @@ let startActivity (name: string) =
         | null -> ActivityContext()
         | current -> current.Context
 
-    activitySource.StartActivity(name, ActivityKind.Internal, parentContext)
+    let activity = activitySource.StartActivity(name, ActivityKind.Internal, parentContext)
+    activity
 
 let configureActivity (tags: (string * obj) list) (activity: Activity) =   
     activity.SetTag("service.name", ServiceName) |> ignore

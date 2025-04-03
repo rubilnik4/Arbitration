@@ -18,7 +18,7 @@ let configureTelemetry (builder: WebApplicationBuilder) =
         .AddLogging(fun logging ->
             logging.AddOpenTelemetry(fun opt ->
                 opt.AddOtlpExporter(fun exporterOpt ->
-                    exporterOpt.Endpoint <- oTelConfig.Loki.LokiEndpoint |> Uri)
+                    exporterOpt.Endpoint <- oTelConfig.Logging.LokiEndpoint |> Uri)
                 |> ignore)
             |> ignore)
     |> ignore

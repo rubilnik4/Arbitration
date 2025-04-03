@@ -17,7 +17,3 @@ storage:
 compactor:
   compaction:
     block_retention: 1h
-
-log:
-  level: info  # Исправлено с logging на log
-  format: logfmt

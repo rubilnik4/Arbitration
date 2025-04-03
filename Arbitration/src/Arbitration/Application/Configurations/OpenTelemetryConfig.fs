@@ -23,7 +23,7 @@ type MetricsConfig = {
 [<CLIMutable>]
 type OpenTelemetryConfig = {
     [<Required>]
-    Loki: LokiConfig
+    Logging: LokiConfig
     
     [<Required>]
     Tracing: TracingConfig
