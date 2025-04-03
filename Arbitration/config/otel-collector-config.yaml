@@ -16,7 +16,7 @@ exporters:
     verbosity: basic
 
   prometheus:
-    endpoint: "prometheus:9090"
+    endpoint: "localhost:9090"
 
   loki:
     endpoint: "http://loki:3100/loki/api/v1/push"
@@ -27,6 +27,10 @@ exporters:
       insecure: true
 
 service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+      
   pipelines:
     metrics:
       receivers: [otlp]
