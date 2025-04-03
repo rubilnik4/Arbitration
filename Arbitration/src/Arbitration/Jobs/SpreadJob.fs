@@ -11,6 +11,7 @@ open Hopac.Infixes
 open Microsoft.Extensions.Logging 
 
 let private computeSpread env state = task {
+    let logger = env.Infra.Logger
     use activity = startActivity "Arbitration.ComputeSpread" |> configureActivity ["operation", "ComputeSpread"]
 
     try
@@ -20,14 +21,13 @@ let private computeSpread env state = task {
         
         match result with
         | Ok spread ->
-            activity |> recordSuccess |> recordDuration |> configureActivity ["spread.value", spread] |> ignore
-            
+            activity |> recordSuccess logger |> recordDuration |> configureActivity ["spread.value", spread] |> ignore            
             return newState
         | Error error ->
-            recordError activity error |> recordDuration |> ignore
+            activity |> recordError logger error |> recordDuration |> ignore
             return state
     with ex ->
-        recordException activity ex |> recordDuration |> ignore
+        activity |> recordException logger ex |> recordDuration |> ignore       
         return state    
 }    
 
@@ -40,20 +40,14 @@ let private spreadJob env = job {
         do! Ch.send timerCh ()
         return! timerLoop()
     }
-    
-    let handleError (e: exn) state = job {
-        env.Infra.Logger.LogError("Failed to execute job spread: {Error}", e.Message)
-        return state
-    }
  
     let rec processingLoop state = 
         Alt.choose [
             Ch.take timerCh ^=> fun _ ->
-                Job.tryInDelay 
-                    (fun () -> computeSpread env state |> Job.awaitTask)
-                    processingLoop
-                    (fun e -> handleError e state >>= processingLoop)
-            
+                job {
+                    let! newState = computeSpread env state |> Job.awaitTask
+                    return! processingLoop newState
+                }
             Ch.take stopCh ^=> fun _ -> job { () }
         ]
        

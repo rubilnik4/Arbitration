@@ -4,6 +4,7 @@ open System
 open System.Diagnostics
 open System.Diagnostics.Metrics
 open Arbitration.Domain.DomainTypes
+open Microsoft.Extensions.Logging
 
 [<Literal>]
 let private ServiceName = "ArbitrationService"
@@ -27,20 +28,23 @@ let configureActivity (tags: (string * obj) list) (activity: Activity) =
     tags |> List.iter (fun (k, v) -> activity.SetTag(k, v) |> ignore)
     activity
 
-let recordSuccess (activity: Activity) =    
+let recordSuccess (logger: ILogger) (activity: Activity) =    
     activity.SetTag("result.status", "success") |> ignore
+    logger.LogInformation("Activity {ActivityName} completed", activity.OperationName)
     activity
 
-let recordError (activity: Activity) (errorMsg: MarketError) =    
+let recordError (logger: ILogger) (error: MarketError) (activity: Activity) =    
     activity.SetTag("result.status", "error") |> ignore
-    activity.SetTag("error.message", errorMsg) |> ignore
+    activity.SetTag("error.message", error) |> ignore
+    logger.LogError("Activity {ActivityName} error: {Error}", activity.OperationName, error)
     activity
     
-let recordException (activity: Activity) (ex: exn) =    
+let recordException (logger: ILogger) (ex: exn) (activity: Activity) =    
     let tags = ActivityTagsCollection()
     tags.Add("exception.type", ex.GetType().Name)
     tags.Add("exception.message", ex.Message)
     activity.AddEvent(ActivityEvent("exception", tags = tags)) |> ignore
+    logger.LogError(ex, "Activity {ActivityName} failed", activity.OperationName)
     activity
 
 let recordDuration (activity: Activity) =    

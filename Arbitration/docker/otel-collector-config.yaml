@@ -1,24 +1,29 @@
 receivers:
   otlp:
     protocols:
-      grpc: {} 
+      grpc: {}
       http: {}
 
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
 exporters:
-  logging:
-    logLevel: debug
-  
+  debug:
+    verbosity: basic
+
   prometheus:
     endpoint: "prometheus:9090"
-  
+
   loki:
     endpoint: "http://loki:3100/loki/api/v1/push"
     labels:
-      resource:
-        service.name: "arbitration"
-  
-  tempo:
-    endpoint: "tempo:9411"
+      attributes:
+        - "service.name"
+
+  otlphttp:
+    endpoint: "http://tempo:3200"  # Исправленный порт для Tempo
     tls:
       insecure: true
 
@@ -26,12 +31,15 @@ service:
   pipelines:
     metrics:
       receivers: [otlp]
-      exporters: [prometheus, logging]
-    
+      processors: [batch]
+      exporters: [prometheus, debug]
+
     logs:
       receivers: [otlp]
-      exporters: [loki, logging]
-    
+      processors: [batch]
+      exporters: [loki, debug]
+
     traces:
       receivers: [otlp]
-      exporters: [tempo, logging]
+      processors: [batch]
+      exporters: [otlphttp, debug]
