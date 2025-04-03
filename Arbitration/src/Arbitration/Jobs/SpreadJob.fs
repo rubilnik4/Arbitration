@@ -1,5 +1,6 @@
 module Arbitration.Jobs.SpreadJob
 
+open System.Diagnostics
 open Arbitration.Application.Commands.SpreadCommand
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
@@ -7,8 +8,8 @@ open Arbitration.Domain.Models.Spreads
 open Arbitration.Infrastructure.Activities
 open Hopac
 open Hopac.Infixes
-open Microsoft.Extensions.Logging
-   
+open Microsoft.Extensions.Logging 
+
 let private computeSpread env state = task {
     use activity = startActivity "Arbitration.ComputeSpread" |> configureActivity ["operation", "ComputeSpread"]
 
@@ -19,15 +20,15 @@ let private computeSpread env state = task {
         
         match result with
         | Ok spread ->
-            activity |> recordSuccess |> configureActivity ["spread.value", spread] |> ignore
+            activity |> recordSuccess |> recordDuration |> configureActivity ["spread.value", spread] |> ignore
             
             return newState
         | Error error ->
-            recordError activity error |> ignore
+            recordError activity error |> recordDuration |> ignore
             return state
     with ex ->
-        recordException activity ex |> ignore
-        return state
+        recordException activity ex |> recordDuration |> ignore
+        return state    
 }    
 
 let private spreadJob env = job {
