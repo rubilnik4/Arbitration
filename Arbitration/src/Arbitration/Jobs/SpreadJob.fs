@@ -59,4 +59,4 @@ let private spreadJob env =
     }
     
 let startSpreadJob env = 
-    spreadJob env |> run
+    spreadJob env |> Job.startIgnore |> run

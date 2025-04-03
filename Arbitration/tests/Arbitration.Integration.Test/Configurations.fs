@@ -12,6 +12,7 @@ let getProjectConfig() = {
     Assets = getAssetConfig()
     SpreadThreshold = 100000m
     MaxHistorySize = 5
+    AssetLoadingDelay = TimeSpan.FromSeconds(15L)
 }
 
 let getCacheConfig() = {  

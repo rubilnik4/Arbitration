@@ -1,0 +1,37 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {} 
+      http: {}
+
+exporters:
+  logging:
+    logLevel: debug
+  
+  prometheus:
+    endpoint: "prometheus:9090"
+  
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"
+    labels:
+      resource:
+        service.name: "arbitration"
+  
+  tempo:
+    endpoint: "tempo:9411"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus, logging]
+    
+    logs:
+      receivers: [otlp]
+      exporters: [loki, logging]
+    
+    traces:
+      receivers: [otlp]
+      exporters: [tempo, logging]
