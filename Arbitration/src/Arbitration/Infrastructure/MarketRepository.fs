@@ -9,55 +9,74 @@ open Arbitration.Domain.DomainTypes
 open Microsoft.Extensions.Logging
 open Npgsql.FSharp
 
-let private insertPrice id price =
-    """
-    INSERT INTO prices (id, asset, price, time)
-    SELECT @id, @asset, @price, @time
-    WHERE NOT EXISTS (
-        SELECT 1 FROM prices WHERE asset = @asset AND time = @time
-    )
-    """,
-    [
-        [
-            "@id", Sql.uuid id
+let private insertPrice env price = task {
+    let priceId = Guid.NewGuid()
+     
+    let! result =
+        env.Postgres
+        |> Sql.fromDataSource
+        |> Sql.query """
+            WITH ins AS (
+                INSERT INTO prices (id, asset, price, time)
+                VALUES (@id, @asset, @price, @time)
+                ON CONFLICT (asset, time) DO NOTHING
+                RETURNING id
+            )
+            SELECT id FROM ins
+            UNION ALL
+            SELECT id FROM prices 
+            WHERE asset = @asset AND time = @time
+            LIMIT 1;
+        """
+        |> Sql.parameters [
+            "@id", Sql.uuid priceId
             "@asset", Sql.string price.Asset
             "@price", Sql.decimal price.Value
             "@time", Sql.timestamptz price.Time
         ]
-    ]
-    
-let saveSpread env spread = task {
-    let priceAId = Guid.NewGuid()
-    let priceBId = Guid.NewGuid()
+        |> Sql.executeAsync (fun read ->
+            read.uuid "id" 
+        )
+        
+    return result.Head 
+}
+
+let saveSpread env spread = task {   
     let spreadId = Guid.NewGuid()
     let assetSpreadKey = getSpreadKey spread
-    
-    let parameters = [
-        insertPrice priceAId spread.PriceA
-        insertPrice priceBId spread.PriceB
+        
+    let! priceAId = insertPrice env spread.PriceA
+    let! priceBId = insertPrice env spread.PriceB 
 
-        """
-        INSERT INTO spreads (id, price_a_id, price_b_id, asset_spread_id, spread_value, spread_time)
-        VALUES (@id, @price_a_id, @price_b_id, @asset_spread_id, @spread_value, @spread_time)
-        """,
-        [
-            [
-                "@id", Sql.uuid spreadId
-                "@price_a_id", Sql.uuid priceAId
-                "@price_b_id", Sql.uuid priceBId
-                "asset_spread_id", Sql.string assetSpreadKey
-                "@spread_value", Sql.decimal spread.Value
-                "@spread_time", Sql.timestamptz spread.Time
-            ]
-        ]
-    ]
-
-    let! _ =
+    let! result =
         env.Postgres
         |> Sql.fromDataSource
-        |> Sql.executeTransactionAsync parameters
+        |> Sql.query """
+        WITH ins AS (
+            INSERT INTO spreads (id, price_a_id, price_b_id, asset_spread_id, spread_value, spread_time)
+            VALUES (@id, @price_a_id, @price_b_id, @asset_spread_id, @spread_value, @spread_time)
+            ON CONFLICT (asset_spread_id, spread_time) DO NOTHING
+            RETURNING id
+        )
+        SELECT id FROM ins
+        UNION ALL
+        SELECT id FROM spreads 
+        WHERE asset_spread_id = @asset_spread_id AND spread_time = @spread_time
+        LIMIT 1;
+        """
+        |> Sql.parameters [
+            "@id", Sql.uuid spreadId
+            "@price_a_id", Sql.uuid priceAId
+            "@price_b_id", Sql.uuid priceBId
+            "asset_spread_id", Sql.string assetSpreadKey
+            "@spread_value", Sql.decimal spread.Value
+            "@spread_time", Sql.timestamptz spread.Time
+        ]
+        |> Sql.executeAsync (fun read ->
+            read.uuid "id" 
+        )
 
-    return spreadId
+    return result.Head
 }
 
 let getLastPrice env assetId = task {
@@ -133,7 +152,7 @@ let postgresSpreadRepository : MarketRepository = {
                 return spreadId |> Ok
             with ex ->
                 env.Logger.LogError(ex, "Failed to save spread {spread} to database", spreadKey)
-                return DatabaseError $"Failed to save spread {spreadKey}" |> Error
+                return DatabaseError ($"Failed to save spread {spreadKey}", ex) |> Error
         }          
     GetLastPrice =
         fun env assetId -> task {
@@ -144,7 +163,7 @@ let postgresSpreadRepository : MarketRepository = {
                 return result
             with ex ->
                 env.Logger.LogError(ex, "Failed to get last price {assetId}", assetId)
-                return DatabaseError $"Failed to get last price {assetId}" |> Error
+                return DatabaseError ($"Failed to get last price {assetId}", ex) |> Error
         }
     GetLastSpread =
         fun env spreadAssetId -> task {          
@@ -155,6 +174,6 @@ let postgresSpreadRepository : MarketRepository = {
                 return result
             with ex ->
                 env.Logger.LogError(ex, "Failed to get last spread {spreadAssetId}", spreadAssetId)
-                return DatabaseError $"Failed to get last spread {spreadAssetId}" |> Error
+                return DatabaseError ($"Failed to get last spread {spreadAssetId}", ex) |> Error
         }
 }

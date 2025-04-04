@@ -7,11 +7,14 @@ open Arbitration.Domain.DomainTypes
 open Microsoft.Extensions.Logging
 
 [<Literal>]
+let ActivityName = "Arbitration"
+
+[<Literal>]
 let private ServiceName = "ArbitrationService"
 
-let private activitySource = new ActivitySource("Arbitration")
+let private activitySource = new ActivitySource(ActivityName)
 
-let private meter = new Meter("Arbitration")
+let private meter = new Meter(ActivityName)
 
 let private spreadDuration = meter.CreateHistogram<float>("spread.duration", "ms")
 

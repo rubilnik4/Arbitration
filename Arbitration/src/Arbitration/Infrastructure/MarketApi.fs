@@ -32,7 +32,7 @@ let private getPrice env (assetId: AssetId) = task {
             return ApiError ($"Binance API error for {assetId}", code, result.Error.Message) |> Error
     with ex ->        
         env.Logger.LogError(ex, "Binance API request failed for {AssetId}", assetId)
-        return ServiceUnavailable $"Binance API request failed for {assetId}" |> Error
+        return ServiceUnavailable ($"Binance API request failed for {assetId}", ex) |> Error
 }
 
 let binanceMarketApi : MarketApi = {

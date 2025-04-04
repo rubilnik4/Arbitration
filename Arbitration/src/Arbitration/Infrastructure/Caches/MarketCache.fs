@@ -26,7 +26,7 @@ let private getCache env prefix key =
     with  
     | ex ->
         env.Logger.LogError(ex, "Failed get cache for key {key}", prefixKey)
-        CacheError $"Failed get cache for key {prefixKey}" |> Error
+        CacheError ($"Failed get cache for key {prefixKey}", ex) |> Error
     
 let inline private setCache env expiration prefix key value =
     let prefixKey = getKey prefix key
@@ -41,7 +41,7 @@ let inline private setCache env expiration prefix key value =
     with   
     | ex ->
         env.Logger.LogError(ex, "Failed set cache for key {key}", prefixKey)
-        CacheError $"Failed set cache for key {prefixKey}" |> Error
+        CacheError ($"Failed set cache for key {prefixKey}", ex) |> Error
         
 let private removeCache env prefix key =
     let prefixKey = getKey prefix key
@@ -53,7 +53,7 @@ let private removeCache env prefix key =
     with   
     | ex ->
         env.Logger.LogError(ex, "Failed remove cache for key {key}", prefixKey)
-        CacheError $"Failed remove cache for key {prefixKey}" |> Error
+        CacheError ($"Failed remove cache for key {prefixKey}", ex) |> Error
     
 let private lastPrice : Cache<AssetId, Price> = {    
     TryGet = fun env -> getCache env LastPricePrefix 

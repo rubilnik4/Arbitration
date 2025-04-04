@@ -4,6 +4,7 @@ open System
 open Arbitration.Application.ProjectConfig
 open Arbitration.Application.Interfaces
 open Arbitration.Composition.CompositionConfig
+open Arbitration.Composition.CompositionTelemetry
 open Arbitration.Controllers.PriceEndpoint
 open Arbitration.Controllers.SpreadEndpoint
 open Arbitration.Infrastructure.MarketCache
@@ -61,3 +62,4 @@ let configureServices (builder: WebApplicationBuilder) =
         .AddEndpointsApiExplorer()
     |> ignore
     configureOptions builder
+    configureTelemetry builder
