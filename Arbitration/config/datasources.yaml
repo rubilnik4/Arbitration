@@ -4,15 +4,15 @@ datasources:
   - name: Loki
     type: loki
     access: proxy
-    url: http://loki:3100
+    url: http://arbitration-loki:3100
     version: 1
 
   - name: Tempo
     type: tempo
     access: proxy
-    url: http://tempo:3200
+    url: http://arbitration-tempo:3200
 
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090
+    url: http://arbitration-prometheus:9090

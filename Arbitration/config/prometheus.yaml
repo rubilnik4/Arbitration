@@ -2,15 +2,18 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "otel-collector"
+  - job_name: "arbitration-otel-self-metrics"
     static_configs:
-      - targets: ["otel-collector:4317"]
-  - job_name: "app"
+      - targets: ["arbitration-otel-collector:8888"]
+  - job_name: "arbitration-otel-collector"
     static_configs:
-      - targets: ["app:8080"]
-  - job_name: "tempo"
+      - targets: ["arbitration-otel-collector:4317"]
+  - job_name: "arbitration-app"
     static_configs:
-      - targets: ["tempo:3200"]
-  - job_name: "loki"
+      - targets: ["arbitration-app:8080"]
+  - job_name: "arbitration-tempo"
     static_configs:
-      - targets: ["loki:3100"]
+      - targets: ["arbitration-tempo:3200"]
+  - job_name: "arbitration-loki"
+    static_configs:
+      - targets: ["arbitration-loki:3100"]
