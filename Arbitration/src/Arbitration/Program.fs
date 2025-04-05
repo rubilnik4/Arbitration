@@ -15,7 +15,6 @@ let main args =
     task {
         let builder = WebApplication.CreateBuilder(args)
         configureServices builder
-        
         let app = builder.Build()
         
         let connectionString = app.Services.GetRequiredService<IOptions<AppConfig>>().Value.Postgres.ConnectionString

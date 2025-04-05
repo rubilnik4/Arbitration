@@ -12,7 +12,7 @@ open Microsoft.Extensions.Logging
 
 let private computeSpread env state = task {
     let logger = env.Infra.Logger
-    use activity = startActivity "Arbitration.ComputeSpread" |> configureActivity ["operation", "ComputeSpread"]
+    use activity = startActivity "arbitration.compute-spread" |> configureActivity ["operation", "compute-spread"]
 
     try
         let spreadAssetId = AssetSpreadId(env.Infra.Config.Project.Assets.AssetA, env.Infra.Config.Project.Assets.AssetB)

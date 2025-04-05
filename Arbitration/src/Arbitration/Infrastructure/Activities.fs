@@ -7,10 +7,10 @@ open Arbitration.Domain.DomainTypes
 open Microsoft.Extensions.Logging
 
 [<Literal>]
-let ActivityName = "Arbitration"
+let ActivityName = "arbitration"
 
 [<Literal>]
-let private ServiceName = "ArbitrationService"
+let private ServiceName = "arbitration-service"
 
 let private activitySource = new ActivitySource(ActivityName)
 

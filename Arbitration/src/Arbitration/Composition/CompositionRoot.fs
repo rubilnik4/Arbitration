@@ -22,12 +22,13 @@ open Npgsql
 open Oxpecker
    
 let private createInfra (services: IServiceProvider) = 
-    let config = services.GetRequiredService<IOptions<AppConfig>>().Value
+    let config = services.GetRequiredService<IOptions<AppConfig>>().Value    
+    let logger = services.GetRequiredService<ILogger>()
     {
         Postgres = NpgsqlDataSource.Create config.Postgres.ConnectionString   
         BinanceRestClient = services.GetRequiredService<IBinanceRestClient>()
         Cache = services.GetRequiredService<IMemoryCache>()
-        Logger = services.GetRequiredService<ILogger>()    
+        Logger = logger   
         Config = config
     }
 

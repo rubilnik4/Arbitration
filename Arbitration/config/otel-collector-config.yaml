@@ -2,14 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: localhost:4317
+        endpoint: 0.0.0.0:4317
       http:
-        endpoint: localhost:4318
-
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
+        endpoint: 0.0.0.0:4318
 
 exporters:
   debug:
@@ -19,10 +14,10 @@ exporters:
     endpoint: "localhost:9090"
 
   loki:
-    endpoint: "http://loki:3100/loki/api/v1/push"
-
+    endpoint: http://arbitration-loki:3100/loki/api/v1/push
+  
   otlphttp:
-    endpoint: "http://tempo:3200"
+    endpoint: "http://localhost:3200"
     tls:
       insecure: true
 
@@ -34,15 +29,12 @@ service:
   pipelines:
     metrics:
       receivers: [otlp]
-      processors: [batch]
       exporters: [prometheus, debug]
 
     logs:
       receivers: [otlp]
-      processors: [batch]
       exporters: [loki, debug]
 
     traces:
       receivers: [otlp]
-      processors: [batch]
       exporters: [otlphttp, debug]

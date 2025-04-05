@@ -2,6 +2,7 @@
 
 services:
   app:
+    container_name: arbitration-app
     build: ../src/Arbitration
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -20,6 +21,7 @@ services:
       - ../src/Arbitration:/app
     
   postgres:
+    container_name: arbitration-postgres
     image: postgres:15.5
     environment:
       POSTGRES_PASSWORD: postgres
@@ -29,6 +31,7 @@ services:
       - "5432:5432"
 
   loki:
+    container_name: arbitration-loki
     image: grafana/loki:3.4
     ports:
       - "3100:3100"
@@ -38,6 +41,7 @@ services:
       - ../config/loki-config.yaml:/etc/loki/local-config.yaml
 
   tempo:
+    container_name: arbitration-tempo
     image: grafana/tempo:2.3.0
     command: ["--config.file=/etc/tempo.yaml"]
     volumes:
@@ -46,6 +50,7 @@ services:
       - "3200:3200"
 
   prometheus:
+    container_name: arbitration-prometheus
     image: prom/prometheus:v2.47.2
     command: ["--config.file=/etc/prometheus/prometheus.yaml"]
     volumes:
@@ -55,6 +60,7 @@ services:
       - "9090:9090"
 
   grafana:
+    container_name: arbitration-grafana
     image: grafana/grafana:10.1.5
     ports:
       - "3000:3000"
@@ -68,6 +74,7 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
 
   otel-collector:
+    container_name: arbitration-otel-collector
     image: otel/opentelemetry-collector-contrib:0.99.0
     volumes:
       - ../config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
