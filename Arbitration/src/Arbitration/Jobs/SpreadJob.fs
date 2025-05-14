@@ -1,6 +1,5 @@
 module Arbitration.Jobs.SpreadJob
 
-open System.Diagnostics
 open Arbitration.Application.Commands.SpreadCommand
 open Arbitration.Application.Interfaces
 open Arbitration.Domain.Models.Assets
@@ -8,7 +7,6 @@ open Arbitration.Domain.Models.Spreads
 open Arbitration.Infrastructure.Activities
 open Hopac
 open Hopac.Infixes
-open Microsoft.Extensions.Logging 
 
 let private computeSpread env state = task {
     let logger = env.Infra.Logger

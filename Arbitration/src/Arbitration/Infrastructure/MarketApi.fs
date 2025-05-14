@@ -27,9 +27,9 @@ let private getPrice env (assetId: AssetId) = task {
             return price |> Ok            
         | false ->
             let code = result.Error.Code |> toVOption 0
-            env.Logger.LogWarning("Binance API error for {assetId}: Code {errorCode}, Message: {message}",
+            env.Logger.LogWarning("Binance API error for asset {assetId}: Code {errorCode}, Message: {message}",
                                   assetId, code, result.Error.Message)
-            return ApiError ($"Binance API error for {assetId}", code, result.Error.Message) |> Error
+            return ApiError ($"Binance API error for asset {assetId}", code, result.Error.Message) |> Error
     with ex ->        
         env.Logger.LogError(ex, "Binance API request failed for {AssetId}", assetId)
         return ServiceUnavailable ($"Binance API request failed for {assetId}", ex) |> Error

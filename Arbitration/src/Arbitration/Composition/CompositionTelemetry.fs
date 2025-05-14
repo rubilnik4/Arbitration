@@ -1,7 +1,6 @@
 module Arbitration.Composition.CompositionTelemetry
 
 open System
-open System.Collections.Generic
 open Arbitration.Application.Configurations.TelemetryConfigs
 open Arbitration.Composition.CompositionConfig
 open Arbitration.Infrastructure.Activities
@@ -9,7 +8,6 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
-open OpenTelemetry.Exporter
 open OpenTelemetry.Resources
 open OpenTelemetry.Trace
 open OpenTelemetry.Metrics

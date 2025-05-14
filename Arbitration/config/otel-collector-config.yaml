@@ -17,7 +17,7 @@ exporters:
     endpoint: http://arbitration-loki:3100/loki/api/v1/push
   
   otlphttp:
-    endpoint: "http://arbitration-tempo:3200"
+    endpoint: "http://arbitration-tempo:4318"
     tls:
       insecure: true
 
